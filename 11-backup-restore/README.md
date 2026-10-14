@@ -75,7 +75,7 @@ Then write `bicep/main.bicep` yourself and deploy to a clean group:
 
 ```bash
 az group create --name rg-lab-backup-restore-iac --location eastus \
-  --tags environment=lab purpose=az104-study lab=backup-restore autoDelete=true
+  --tags environment=lab purpose=lab lab=backup-restore autoDelete=true
 
 az deployment group create \
   --resource-group rg-lab-backup-restore-iac \

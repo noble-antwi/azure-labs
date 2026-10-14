@@ -75,7 +75,7 @@ Then write `bicep/main.bicep` yourself and deploy to a clean group:
 
 ```bash
 az group create --name rg-lab-vnet-to-vnet-vpn-iac --location eastus \
-  --tags environment=lab purpose=az104-study lab=vnet-to-vnet-vpn autoDelete=true
+  --tags environment=lab purpose=lab lab=vnet-to-vnet-vpn autoDelete=true
 
 az deployment group create \
   --resource-group rg-lab-vnet-to-vnet-vpn-iac \

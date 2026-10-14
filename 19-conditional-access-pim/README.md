@@ -75,7 +75,7 @@ Then write `bicep/main.bicep` yourself and deploy to a clean group:
 
 ```bash
 az group create --name rg-lab-conditional-access-pim-iac --location eastus \
-  --tags environment=lab purpose=az104-study lab=conditional-access-pim autoDelete=true
+  --tags environment=lab purpose=lab lab=conditional-access-pim autoDelete=true
 
 az deployment group create \
   --resource-group rg-lab-conditional-access-pim-iac \

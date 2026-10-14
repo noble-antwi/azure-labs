@@ -20,7 +20,8 @@ fi
 
 mkdir -p "$DIR/diagrams" "$DIR/screenshots" "$DIR/bicep"
 touch "$DIR/diagrams/.gitkeep" "$DIR/screenshots/.gitkeep" "$DIR/bicep/.gitkeep"
-sed "s/rg-lab-[a-z0-9-]*/rg-lab-${SLUG}/g" 01-governance-tagging/README.md \
-  | sed "1s/.*/# $(echo "$SLUG" | tr '-' ' ')/" > "$DIR/README.md"
+TITLE="$(echo "$SLUG" | tr '-' ' ')"
+sed -e "s/__SLUG__/${SLUG}/g" -e "s/__TITLE__/${TITLE}/g" \
+  docs/lab-template.md > "$DIR/README.md"
 
 echo "Created $DIR"

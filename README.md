@@ -34,7 +34,7 @@ of it.
 ## Conventions
 
 - One resource group per lab, named `rg-lab-<topic>`.
-- Every resource carries `environment=lab`, `purpose=az104-study`,
+- Every resource carries `environment=lab`, `purpose=lab`,
   `lab=<lab-name>` and `autoDelete=true`.
 - Region is `eastus` unless a lab specifically needs another.
 - Run `scripts/check-running.sh` before closing the laptop.

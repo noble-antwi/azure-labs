@@ -75,7 +75,7 @@ Then write `bicep/main.bicep` yourself and deploy to a clean group:
 
 ```bash
 az group create --name rg-lab-hub-spoke-bastion-iac --location eastus \
-  --tags environment=lab purpose=az104-study lab=hub-spoke-bastion autoDelete=true
+  --tags environment=lab purpose=lab lab=hub-spoke-bastion autoDelete=true
 
 az deployment group create \
   --resource-group rg-lab-hub-spoke-bastion-iac \
