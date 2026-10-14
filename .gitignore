@@ -1,0 +1,39 @@
+# Parameter files may contain subscription/tenant IDs
+*.parameters.json
+!*.parameters.example.json
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Compiled ARM output from Bicep
+*.json
+!*.example.json
+!.vscode/*.json
+!.github/**/*.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# Azure CLI / credentials
+azureProfile.json
+*.publishsettings
+*.pfx
+*.pem
+*.key
+
+# draw.io backup files
+*.drawio.bkp
+*.drawio.dtmp
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
