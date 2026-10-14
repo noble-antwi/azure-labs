@@ -1,0 +1,108 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Lab 01 reference" id="lab01-reference">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="720" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;Lab 01: Governance and tagging&lt;/b&gt;&lt;br&gt;REFERENCE. Draw your own as architecture.drawio" style="text;html=1;align=left;verticalAlign=top;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="20" y="10" width="520" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Subscription boundary -->
+        <mxCell id="sub" value="Subscription" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#0078D4;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=56;spacingTop=14;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="80" width="720" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="sub-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/general/Subscriptions.svg;" vertex="1" parent="1">
+          <mxGeometry x="356" y="92" width="32" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- Resource group boundary -->
+        <mxCell id="rg" value="rg-lab-governance-tagging&lt;br&gt;&lt;span style=&quot;font-weight:normal;font-size:12px&quot;&gt;tags: costCenter=it-lab · owner=noble · environment=lab · purpose=lab · lab=governance-tagging · autoDelete=true&lt;/span&gt;" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;fillColor=#F3F8FD;strokeColor=#0078D4;verticalAlign=top;align=left;spacingLeft=56;spacingTop=10;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="150" width="640" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="rg-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" vertex="1" parent="1">
+          <mxGeometry x="394" y="162" width="32" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- Lock -->
+        <mxCell id="lock" value="&lt;b&gt;Lock: lock-no-delete&lt;/b&gt;&lt;br&gt;CanNotDelete. Applies to the group and everything in it" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CE;strokeColor=#C19C00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="780" y="215" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- VNets inside the RG -->
+        <mxCell id="vnet-before" value="&lt;b&gt;vnet-before&lt;/b&gt;&lt;br&gt;created BEFORE the policies&lt;br&gt;no tags" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/networking/Virtual_Networks.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="470" y="320" width="56" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="vnet-after" value="&lt;b&gt;vnet-after&lt;/b&gt;&lt;br&gt;created AFTER the policies&lt;br&gt;owner tag only (costCenter added by P1?)" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/networking/Virtual_Networks.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="720" y="320" width="56" height="34" as="geometry" />
+        </mxCell>
+
+        <!-- Blocked VNet, outside the RG -->
+        <mxCell id="vnet-westus" value="&lt;b&gt;vnet-westus&lt;/b&gt;&lt;br&gt;never created: blocked by P4" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/networking/Virtual_Networks.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="720" y="560" width="56" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="vnet-westus-x" value="✕" style="text;html=1;align=center;verticalAlign=middle;fontSize=28;fontColor=#D13438;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="728" y="555" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e-westus" value="denied" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;fontColor=#D13438;fontSize=11;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="rg" target="vnet-westus">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Policies, left column -->
+        <mxCell id="p1" value="&lt;b&gt;P1 · Modify&lt;/b&gt;&lt;br&gt;Inherit a tag from the resource group if missing&lt;br&gt;tag: costCenter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DEECF9;strokeColor=#0078D4;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="150" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;P2 · Deny&lt;/b&gt;&lt;br&gt;Require a tag on resources&lt;br&gt;tag: costCenter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;strokeColor=#D13438;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="260" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;P3 · Deny&lt;/b&gt;&lt;br&gt;Require a tag on resources&lt;br&gt;tag: owner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;strokeColor=#D13438;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="340" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="&lt;b&gt;P4 · Deny&lt;/b&gt;&lt;br&gt;Allowed locations&lt;br&gt;East US only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;strokeColor=#D13438;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="420" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/management_governance/Policy.svg;" vertex="1" parent="1">
+          <mxGeometry x="28" y="171" width="26" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/management_governance/Policy.svg;" vertex="1" parent="1">
+          <mxGeometry x="28" y="277" width="26" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/management_governance/Policy.svg;" vertex="1" parent="1">
+          <mxGeometry x="28" y="357" width="26" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/management_governance/Policy.svg;" vertex="1" parent="1">
+          <mxGeometry x="28" y="437" width="26" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- Managed identity for P1 -->
+        <mxCell id="mi" value="&lt;b&gt;Managed identity&lt;/b&gt;&lt;br&gt;lets P1 write tags" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/identity/Managed_Identities.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="130" y="80" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e-mi" value="" style="endArrow=none;html=1;strokeColor=#0078D4;" edge="1" parent="1" source="mi" target="p1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Assignment arrows -->
+        <mxCell id="e-p1" value="assigned to" style="endArrow=block;html=1;dashed=1;strokeColor=#0078D4;fontSize=10;entryX=0;entryY=0.15;entryDx=0;entryDy=0;" edge="1" parent="1" source="p1" target="rg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-p2" value="" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;entryX=0;entryY=0.4;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="rg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-p3" value="" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;entryX=0;entryY=0.6;entryDx=0;entryDy=0;" edge="1" parent="1" source="p3" target="rg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-p4" value="" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;entryX=0;entryY=0.85;entryDx=0;entryDy=0;" edge="1" parent="1" source="p4" target="rg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;Blue = Modify (changes the request)&lt;br&gt;Red = Deny (blocks the request)&lt;br&gt;Dashed arrow = policy assignment scope&lt;br&gt;Faded + ✕ = request refused, resource never exists" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="20" y="540" width="260" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

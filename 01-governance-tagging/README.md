@@ -58,6 +58,10 @@ rule is attached and what it reaches. So, unlike the other labs, the diagram
 *does* show the subscription and resource group, because here they are the
 architecture.
 
+`diagrams/reference.drawio` is a reference layout with the Azure icon set.
+`diagrams/architecture.drawio` is drawn by hand from it, as the learning
+exercise.
+
 ```mermaid
 graph TD
   SUB[Subscription] --> RG["rg-lab-governance-tagging<br/>tags: costCenter=it-lab, owner=noble<br/>LOCK: CanNotDelete"]
