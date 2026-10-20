@@ -32,7 +32,7 @@ Three things this lab sets out to answer:
 
 | # | My prediction | What actually happened |
 |---|---|---|
-| 1 |  |  |
+| 1 | No. Nothing has been assigned that copies tags down, so a new resource starts with no tags. |  |
 | 2 |  |  |
 | 3 |  |  |
 
@@ -122,6 +122,20 @@ The access panel lists `Owner` twice at "This resource". Two separate
 assignments of the same role are harmless: permissions add up, they do not
 double. It is still the kind of duplicate an access review would flag for
 cleanup.
+
+### 2. Create the resource group with its tags
+
+`rg-lab-governance-tagging` in **East US**, in the dev subscription, with six
+tags. Two of them do real work later: `costCenter` is the value P1 copies down
+to resources, and `owner` is the tag P3 demands.
+
+![The resource group's six tags](screenshots/01-01-rg-tags.png)
+
+The Tags page states two rules worth remembering. **Tag names are not case
+sensitive; tag values are.** `Owner` and `owner` are the same tag, but
+`it-lab` and `IT-Lab` are different values, and a cost report grouped by
+value will split them. It also warns that tag data is replicated globally, so
+a tag must never hold anything secret or personal.
 
 ## Break it
 
