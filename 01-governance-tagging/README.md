@@ -104,9 +104,24 @@ answered.
 
 <!-- Filled in step by step as the lab is built. Decisions, not clicks. -->
 
-1.
-2.
-3.
+### 1. Confirm the right role
+
+P1 is a `Modify` policy, so Azure gives it a managed identity and grants that
+identity a role on the resource group. Granting roles needs `Owner` or
+`User Access Administrator`; a `Contributor` can build everything else in this
+lab but would fail at that one step.
+
+**Subscriptions > (subscription) > Access control (IAM) > View my access**
+showed `Owner` on both lab subscriptions.
+
+![Owner on both lab subscriptions](screenshots/01-00-subscriptions.png)
+
+![View my access showing Owner](screenshots/01-00-my-access.png)
+
+The access panel lists `Owner` twice at "This resource". Two separate
+assignments of the same role are harmless: permissions add up, they do not
+double. It is still the kind of duplicate an access review would flag for
+cleanup.
 
 ## Break it
 
