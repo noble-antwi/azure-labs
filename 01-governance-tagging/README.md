@@ -694,15 +694,17 @@ Access Administrator).
 
 ## Break it
 
-<!--
-Planned breaks:
-  - Create a VNet with no tags: does P2 deny it, or does P1 rescue it?
-  - Create a VNet with no owner tag: P3 should deny. Record the exact error.
-  - Create a VNet in West US: P4 should deny.
-  - Run a remediation task on vnet-before while P3 is still assigned: does
-    the remediation succeed, given vnet-before has no owner tag?
-  - Try to delete the resource group with the lock still on.
--->
+Every break was run inside the build above. In one place:
+
+| Attempt | Rules in play | Result | Refused by |
+|---|---|---|---|
+| `vnet-p2-test`, no tags | P1 + P2 | created, `costCenter` added | nothing |
+| `vnet-p2-control`, no tags, P1 set to Do not enforce | P2 alone | refused | P2 |
+| `vnet-p3-noowner`, no tags | P1 + P2 + P3 | refused | P3 |
+| `vnet-westus`, owner tag, West US | all four | refused | P4 |
+| Remediation task on `vnet-before` | P1 fix vs P3 | failed (`PolicyRemediationFailure`) | P3 |
+| Add `test=1` to `vnet-p1-test` (no owner) | P3 | refused | P3, not the lock |
+| Delete `vnet-p1-test` under the lock | Delete lock | refused | the lock |
 
 ## Rebuild it as code
 
@@ -725,11 +727,41 @@ az deployment group create \
 
 ## What I found
 
-<!--
-The answer to the three questions above, in your own words. Include anything
-that surprised you, anything the documentation got wrong or left out, and the
-one sentence you would want to read back before the exam.
--->
+**1. Resource group tags do not flow down.** `vnet-before` sat in a group with
+six tags and carried none. Inheritance takes a policy (P1), one assignment per
+tag name, and the inherited value is only a default: it can be wrong for
+anyone outside the department that owns the group.
+
+**2. A new policy reports old resources at once but changes them only on their
+next update.** `vnet-before` was flagged non-compliant within minutes and left
+untouched. A remediation task can apply a Modify policy to it, but the task
+works by sending an ordinary update, and that update is checked by every Deny
+rule. With P3 in place the remediation failed; adding the missing `owner` tag
+by hand let P1 add `costCenter` in the same request.
+
+**3. Modify runs before Deny.** With P1 and P2 targeting the same tag, an
+untagged network was created with `costCenter` added. Switching P1 to *Do not
+enforce* made P2 refuse the same request. The Activity log records the order
+on every request: **Modify**, then **'deny' Policy action**.
+
+**Also learned:**
+
+- The portal's *Validation passed* does not mean Azure Policy approved the
+  request. Policy runs when the deployment reaches Azure Resource Manager.
+- A denied deployment's **Errors** panel can be empty; the detail
+  (`RequestDisallowedByPolicy`, the policy name, the custom message) is in the
+  Activity log JSON or the Tags page's own error panel.
+- A system-assigned managed identity was created for P2, a Deny rule that can
+  never use it, because the box is ticked by default. Untick it for Deny and
+  Audit rules.
+- P1's identity received **Contributor** where **Tag Contributor** would do.
+- A **Delete** lock stops deletion and nothing else, for every user including
+  Owners.
+
+**One sentence for the exam:** *Modify and Append change the request before
+Deny checks it, Deny can only block, only Modify and DeployIfNotExists can be
+remediated, and a remediation is just another update that every Deny rule
+still checks.*
 
 ## Exam relevance
 
@@ -737,7 +769,24 @@ AZ-104 domain **Manage Azure identities and governance**: manage tags,
 implement and manage Azure Policy, configure resource locks, manage resource
 groups.
 
-<!-- After the build: what a question on this looks like. -->
+Typical questions this lab answers:
+
+- *Resources in RG1 must carry the department tag of their resource group.
+  What do you assign?* **Inherit a tag from the resource group if missing**
+  (Modify), plus a remediation task for existing resources.
+- *You assign a policy that requires a tag. What happens to existing resources
+  without it?* They are marked **non-compliant**; nothing is deleted or
+  changed.
+- *Which effects support remediation tasks?* **Modify** and
+  **DeployIfNotExists**.
+- *A Modify policy needs to change resources. What must the assignment have?*
+  A **managed identity** with a suitable role.
+- *Users must be able to change resources in RG1 but not delete them.* A
+  **CanNotDelete** (Delete) lock.
+- *Allowed locations is assigned, but a resource group was still created in
+  another region.* The rule does not cover resource groups; use **Allowed
+  locations for resource groups**.
+- *Tag names vs values:* names are case-insensitive, values case-sensitive.
 
 ## Cost
 
