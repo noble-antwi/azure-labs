@@ -1,5 +1,8 @@
 # cost guardrail
 
+> **Intent:** Automate cost guardrails: budgets, alerts and auto-shutdown, so a forgotten lab cannot burn a month of credit.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

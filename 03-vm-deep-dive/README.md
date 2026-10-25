@@ -1,5 +1,8 @@
 # vm deep dive
 
+> **Intent:** Settle what a VM is made of (size family, disks, NIC, IP) and prove the billing difference between shutting down inside the OS and deallocating from Azure.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

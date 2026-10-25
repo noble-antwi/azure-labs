@@ -1,5 +1,8 @@
 # entra users groups
 
+> **Intent:** Create users and groups at scale: bulk invite, dynamic membership rules, and group-based licensing, and see where dynamic rules lag.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

@@ -1,5 +1,8 @@
 # hub spoke bastion
 
+> **Intent:** Wire a hub-and-spoke with peering and Bastion, and learn what peering does and does not transit.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

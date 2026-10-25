@@ -1,5 +1,8 @@
 # keyvault managed identity
 
+> **Intent:** Give a VM a managed identity and read a Key Vault secret with no credential anywhere in code or config. Ties into the AI-agent identity lab's NHI theme.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

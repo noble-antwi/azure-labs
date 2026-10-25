@@ -1,5 +1,8 @@
 # conditional access pim
 
+> **Intent:** Require MFA with Conditional Access and hand out admin roles just-in-time with PIM. Needs the Entra ID P2 trial, the licence gap found in lab 01.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

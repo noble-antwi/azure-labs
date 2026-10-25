@@ -1,5 +1,8 @@
 # azure files share
 
+> **Intent:** Stand up an Azure Files SMB share, mount it, snapshot it, and control access with identity instead of storage keys.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

@@ -1,5 +1,8 @@
 # full environment
 
+> **Intent:** Build the whole environment from one Bicep template, destroy it, and build it again: the proof that everything above became code.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

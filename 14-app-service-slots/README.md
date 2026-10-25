@@ -1,5 +1,8 @@
 # app service slots
 
+> **Intent:** Deploy to an App Service staging slot and swap to production with zero downtime, then swap back.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

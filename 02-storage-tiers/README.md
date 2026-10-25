@@ -1,5 +1,8 @@
 # storage tiers
 
+> **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

@@ -1,5 +1,8 @@
 # custom rbac role
 
+> **Intent:** Build a least-privilege custom RBAC role and test its exact boundaries. Follow-up to lab 01's finding that P1's identity got Contributor where Tag Contributor would do.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

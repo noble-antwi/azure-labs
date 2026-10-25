@@ -1,5 +1,8 @@
 # bicep cicd
 
+> **Intent:** Deploy Bicep from GitHub Actions with a what-if gate, OIDC sign-in and no stored credentials.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

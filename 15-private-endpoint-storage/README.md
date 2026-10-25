@@ -1,5 +1,8 @@
 # private endpoint storage
 
+> **Intent:** Lock a storage account to a Private Endpoint: public access off, private DNS on, and prove where the name resolves from inside and outside.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

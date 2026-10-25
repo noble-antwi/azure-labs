@@ -1,5 +1,8 @@
 # monitoring alerts
 
+> **Intent:** Raise metric and log alerts with action groups: how fast does an alert really fire, and what noise does it bring?
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

@@ -1,5 +1,8 @@
 # three tier vnet
 
+> **Intent:** Build a three-tier VNet with subnets and NSGs, and answer: does a subnet NSG filter traffic between two VMs inside that same subnet?
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

@@ -1,5 +1,8 @@
 # load balancer failover
 
+> **Intent:** Put two VMs behind a load balancer, kill one, and watch the health probe pull it from rotation.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--

@@ -1,5 +1,8 @@
 # security baseline
 
+> **Intent:** Turn on Defender for Cloud properly and work its recommendations. Lab 01 already met its ASC Default initiative, assigned to every subscription automatically.
+> *Status: not started. Built in order; see the repo README.*
+
 ## What this lab is
 
 <!--
