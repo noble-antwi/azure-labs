@@ -577,6 +577,49 @@ Azure registered the `Microsoft.PolicyInsights` provider on the subscription
 the first time a policy was assigned there, which is what produces the
 compliance data.
 
+### 5. Remediate vnet-before
+
+**Policy > Remediation** lists only P1. Remediation exists for effects that
+know the fix (`Modify`, `DeployIfNotExists`); the three Deny rules have nothing
+to apply. *Resources to Remediate: 1* is `vnet-before`. The assignment page's
+**Create remediation task** button opens the same form.
+
+![Only P1 can be remediated](screenshots/01-47-policies-to-remediate.png)
+
+![New remediation task, vnet-before listed](screenshots/01-48-new-remediation-task.png)
+
+The form restates P1's "if missing": *if the tag exists with a different
+value it will not be changed.* Defaults kept: all locations, failure threshold
+100%, resource count 500.
+
+![Task in progress](screenshots/01-49-remediation-in-progress.png)
+
+**The task failed.**
+
+![Remediation task failed](screenshots/01-50-remediation-failed.png)
+
+The `vnet-before` row's deployment error explains why:
+
+![Remediation blocked by P3](screenshots/01-51-remediation-blocked-by-p3.png)
+
+```
+PolicyRemediationFailure: Failed to remediate resource ... vnet-before.
+The 'PATCH' request failed with status code: 'Forbidden'.
+Inner Error: 'Resource 'vnet-before' was disallowed by policy. Reasons:
+'Every resource in this group needs an owner tag with the name of the
+person responsible'.'
+```
+
+A remediation task is not a back door. It applies its fix by sending an
+ordinary update (`PATCH`) to the resource, and that update goes through every
+assigned Deny rule like any other request. `vnet-before` has no `owner` tag,
+so P3 refused the update that would have added `costCenter`.
+
+The lesson for real tenants: rolling out a new Deny rule before cleaning up
+existing resources can quietly break the remediation of an unrelated Modify
+rule. Fix the old resources first, or exempt them while the remediation
+runs.
+
 ## Break it
 
 <!--
