@@ -620,6 +620,37 @@ existing resources can quietly break the remediation of an unrelated Modify
 rule. Fix the old resources first, or exempt them while the remediation
 runs.
 
+### 6. Fix it by hand
+
+On `vnet-before`'s Tags page, only `owner = noble` was added and applied.
+
+![Adding only owner](screenshots/01-52-vnet-before-add-owner.png)
+
+Afterwards the network carried **both** `owner` and `costCenter`.
+
+![vnet-before with both tags](screenshots/01-54-vnet-before-both-tags.png)
+
+A second remediation task was started straight after, which made it look as
+if the task had added `costCenter`. The Remediation page said otherwise:
+**Resources to Remediate: 0**. There was nothing left for it to do.
+
+![Nothing left to remediate](screenshots/01-53-nothing-left-to-remediate.png)
+
+The `vnet-before` Activity log settles it:
+
+![Write tags with Modify inside it](screenshots/01-55-write-tags-then-modify.png)
+
+| When | Operation | Result | What happened |
+|---|---|---|---|
+| 00:22 | Modify → Write tags → 'deny' Policy action | Failed | the first remediation task's update, refused by P3 |
+| 00:28:33 | Write tags → **Modify** | Succeeded | the manual edit; P1 added `costCenter` inside it |
+
+The successful **Modify** was initiated by the signed-in user, not by P1's
+managed identity: it ran inside the user's own tag update. Adding `owner`
+satisfied P3, and the same request gave P1 its chance to add `costCenter`.
+**Any update to a non-compliant resource triggers its Modify policies**, so
+fixing the missing Deny tag fixed the Modify tag for free.
+
 ## Break it
 
 <!--
