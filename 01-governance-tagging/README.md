@@ -81,6 +81,11 @@ removes its access to everything in the directory.
 
 ## Architecture
 
+![Animated: three requests through the four policies](diagrams/policy-flow.svg)
+
+*Animated. Three create requests from this lab pass through the rules in the
+order Azure evaluates them. Built by `scripts/diagrams/lab01_policy_flow.py`.*
+
 ![Architecture](diagrams/architecture.png)
 
 This lab has no network traffic to draw. What matters is **scope**: where each
@@ -796,15 +801,21 @@ all free. This is the one lab that can be left running without worry.
 
 ## Teardown
 
-The lock has to come off first, or the delete fails. That is the point of a
-lock.
+Order matters. The lock has to come off first, or the delete fails (that is
+the point of a lock). P4 sits on the **subscription**, so deleting the resource
+group does not remove it; it has to be deleted on its own, or it keeps
+blocking every other region in the subscription.
 
 ```bash
 az lock delete --name lock-no-delete --resource-group rg-lab-governance-tagging
 az group delete --name rg-lab-governance-tagging --yes --no-wait
 az group delete --name rg-lab-governance-tagging-iac --yes --no-wait
+az policy assignment list --scope /subscriptions/<subscription-id>   --query "[?displayName=='P4 eastus only'].name" -o tsv
+az policy assignment delete --name <name-from-above> --scope /subscriptions/<subscription-id>
 ```
 
-Policy assignments and role assignments scoped to the resource group go with
-it when it is deleted. Confirm under **Policy > Assignments** that nothing is
-left behind.
+P1 to P3, their managed identities and P1's role assignment are scoped to the
+resource group and go with it. `NetworkWatcherRG` was created by Azure, not by
+this lab; it costs nothing and is reused by later network labs, so it stays.
+Confirm under **Policy > Assignments** that only the two ASC Default
+initiatives remain.

@@ -50,7 +50,7 @@ Simple structural views can go inline as Mermaid, which GitHub renders natively.
 ## Labs
 
 ### Foundations
-1. Governance and tagging policy
+1. [Governance and tagging policy](01-governance-tagging/) · **done (portal)**
 2. Storage account access tiers
 3. Virtual machine deep dive
 4. Custom RBAC role
