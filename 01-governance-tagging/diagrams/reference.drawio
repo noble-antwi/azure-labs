@@ -35,7 +35,7 @@
         <mxCell id="vnet-before" value="&lt;b&gt;vnet-before&lt;/b&gt;&lt;br&gt;created BEFORE the policies&lt;br&gt;no tags" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/networking/Virtual_Networks.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="470" y="320" width="56" height="34" as="geometry" />
         </mxCell>
-        <mxCell id="vnet-after" value="&lt;b&gt;vnet-after&lt;/b&gt;&lt;br&gt;created AFTER the policies&lt;br&gt;owner tag only (costCenter added by P1?)" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/networking/Virtual_Networks.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="vnet-after" value="&lt;b&gt;vnet-p1/p2/p3 tests&lt;/b&gt;&lt;br&gt;created AFTER the policies&lt;br&gt;costCenter added by P1" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/networking/Virtual_Networks.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="720" y="320" width="56" height="34" as="geometry" />
         </mxCell>
 
@@ -46,7 +46,7 @@
         <mxCell id="vnet-westus-x" value="✕" style="text;html=1;align=center;verticalAlign=middle;fontSize=28;fontColor=#D13438;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="728" y="555" width="40" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="e-westus" value="denied" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;fontColor=#D13438;fontSize=11;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="rg" target="vnet-westus">
+        <mxCell id="e-westus" value="denied" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;fontColor=#D13438;fontSize=11;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="sub" target="vnet-westus">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
@@ -60,7 +60,7 @@
         <mxCell id="p3" value="&lt;b&gt;P3 · Deny&lt;/b&gt;&lt;br&gt;Require a tag on resources&lt;br&gt;tag: owner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;strokeColor=#D13438;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
           <mxGeometry x="20" y="340" width="260" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="p4" value="&lt;b&gt;P4 · Deny&lt;/b&gt;&lt;br&gt;Allowed locations&lt;br&gt;East US only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;strokeColor=#D13438;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
+        <mxCell id="p4" value="&lt;b&gt;P4 · Deny&lt;/b&gt;&lt;br&gt;Allowed locations, East US only&lt;br&gt;assigned to the SUBSCRIPTION" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7E9;strokeColor=#D13438;fontSize=11;align=left;spacingLeft=40;" vertex="1" parent="1">
           <mxGeometry x="20" y="420" width="260" height="60" as="geometry" />
         </mxCell>
         <mxCell id="p1-icon" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/management_governance/Policy.svg;" vertex="1" parent="1">
@@ -94,7 +94,7 @@
         <mxCell id="e-p3" value="" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;entryX=0;entryY=0.6;entryDx=0;entryDy=0;" edge="1" parent="1" source="p3" target="rg">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-p4" value="" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;entryX=0;entryY=0.85;entryDx=0;entryDy=0;" edge="1" parent="1" source="p4" target="rg">
+        <mxCell id="e-p4" value="" style="endArrow=block;html=1;dashed=1;strokeColor=#D13438;entryX=0;entryY=0.92;entryDx=0;entryDy=0;" edge="1" parent="1" source="p4" target="sub">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 

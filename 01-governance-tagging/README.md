@@ -94,26 +94,27 @@ exercise.
 
 ```mermaid
 graph TD
-  SUB[Subscription] --> RG["rg-lab-governance-tagging<br/>tags: costCenter=it-lab, owner=noble<br/>LOCK: CanNotDelete"]
-  P1["Policy: Inherit costCenter from RG<br/>(Modify, managed identity)"] -.assigned to.-> RG
-  P2["Policy: Require costCenter on resources<br/>(Deny)"] -.assigned to.-> RG
-  P3["Policy: Require owner on resources<br/>(Deny)"] -.assigned to.-> RG
-  P4["Policy: Allowed locations = eastus<br/>(Deny)"] -.assigned to.-> RG
-  RG --> V1["vnet-before<br/>created BEFORE policies, no tags"]
-  RG --> V2["vnet-after<br/>created AFTER policies, owner tag only"]
-  RG -.-x V3["vnet-westus<br/>blocked by Allowed locations"]
+  P4["P4 Allowed locations = East US<br/>(Deny)"] -.assigned to.-> SUB[Subscription sub-noble-seclab-001]
+  SUB --> RG["rg-lab-governance-tagging<br/>tags: costCenter=it-lab, owner=noble, +4<br/>LOCK: Delete (CanNotDelete)"]
+  P1["P1 Inherit costCenter from RG<br/>(Modify, managed identity)"] -.assigned to.-> RG
+  P2["P2 Require costCenter<br/>(Deny)"] -.assigned to.-> RG
+  P3["P3 Require owner<br/>(Deny)"] -.assigned to.-> RG
+  RG --> V1["vnet-before<br/>predates the rules"]
+  RG --> V2["vnet-p1-test, vnet-p2-test,<br/>vnet-p2-control, vnet-p3-ok<br/>created under the rules"]
+  RG -.-x V3["vnet-p3-noowner<br/>refused by P3"]
+  SUB -.-x V4["vnet-westus<br/>refused by P4"]
 ```
 
 ## What gets built
 
 | Resource | SKU / size | Why it's here |
 |---|---|---|
-| Resource group `rg-lab-governance-tagging` | n/a | The scope every policy is assigned to |
+| Resource group `rg-lab-governance-tagging` | n/a | The scope P1 to P3 are assigned to (P4 sits on the subscription) |
 | 4 policy assignments | Built-in definitions | The rules being tested |
 | System-assigned managed identity | n/a | Lets the Modify policy write tags |
 | `CanNotDelete` lock | n/a | Shows locks beat permissions |
 | `vnet-before` | Virtual network, free | Stands in for a resource that predates the rules |
-| `vnet-after` | Virtual network, free | A resource created under the rules |
+| `vnet-p1-test`, `vnet-p2-test`, `vnet-p2-control`, `vnet-p3-ok` | Virtual networks, free | One per test, created under the rules |
 
 Virtual networks are used because they cost nothing to keep and are created in
 seconds. The lab is about the rules, not the resource.
@@ -125,7 +126,7 @@ seconds. The lab is about the rules, not the resource.
 | P1 | Inherit a tag from the resource group if missing | Modify | Tag name: `costCenter` |
 | P2 | Require a tag on resources | Deny | Tag name: `costCenter` |
 | P3 | Require a tag on resources | Deny | Tag name: `owner` |
-| P4 | Allowed locations | Deny | `East US` |
+| P4 | Allowed locations | Deny | `East US`, assigned to the **subscription** |
 
 P1 and P2 deliberately target the same tag. That is how question 3 gets
 answered.
