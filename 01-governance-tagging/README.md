@@ -347,6 +347,38 @@ create or update request, Azure Policy evaluates:
 If any single Deny matches, the request fails. A Deny cannot be outvoted by
 another assignment; only an **exemption** lets a resource past it.
 
+#### Test A: P1 and P2 both on, no tags
+
+Run at 10:15 PM, 38 minutes after P2 was assigned, so P2 had had time to take
+effect. `vnet-p2-test`, address space `10.2.0.0/16`, Tags tab left empty.
+
+![No tags entered](screenshots/01-20-p2-test-no-tags.png)
+
+**Validation passed.** P2 did not object.
+
+![Validation passed](screenshots/01-21-p2-test-validation-passed.png)
+
+![costCenter added by P1](screenshots/01-22-p2-test-costcenter-added.png)
+
+The network was created carrying `costCenter : it-lab`. P1 added the tag
+first, so by the time P2 checked the request the tag was already there.
+
+The intuition going in was that a block would win over everything else. It
+does, but only over the request **as it stands after Modify has run**. Deny
+never sees the original request the person typed. A Deny that targets a tag
+some Modify policy supplies is therefore a backstop: it only fires if the
+Modify is missing, disabled, or excluded.
+
+By then the compliance view had caught up with `vnet-p1-test`: P1 and P2 each
+showed **1 of 2** resources compliant. The non-compliant one in both is
+`vnet-before`.
+
+![P1 and P2 at 50%](screenshots/01-23-compliance-p1-p2-half.png)
+
+The overall tile stays at **0 out of 4** because a resource counts as compliant
+only if it passes *every* assigned policy, and the ASC Default initiative
+still flags all of them.
+
 ## Break it
 
 <!--
