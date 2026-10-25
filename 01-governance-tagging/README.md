@@ -444,6 +444,57 @@ Modify in front of it.
 Straight after assignment P3 read *Not started*, *100% (0 out of 0)*: it had
 not been evaluated against anything yet.
 
+#### Testing P3
+
+**The Tags tab warns before you submit.** While creating `vnet-p3-noowner`,
+the portal's Tags tab showed P2's non-compliance message inline, with a
+**Click here to set required tags** link. The portal reads the Deny policies on
+the target scope and surfaces their messages in the form.
+
+![Tags tab shows the policy message](screenshots/01-33-tags-tab-policy-warning.png)
+
+It still showed the costCenter warning with `owner=noble` entered:
+
+![Warning stays with owner entered](screenshots/01-34-tags-tab-warning-with-owner.png)
+
+That warning is only advice. The form checks the Deny rule on its own and does
+not know that P1 will add `costCenter` on the way in, so it warns about a tag
+that will in fact be supplied. Only the real request, evaluated by Azure
+Resource Manager, applies the effects in order.
+
+**Where the full error lives.** `vnet-p3-noowner` (no tags) failed at Create,
+and the portal's **Click here to view details** opened an empty *Errors* panel:
+the request was refused at validation, before any deployment existed to hold an
+error. The detail is in the resource group's **Activity log**. Under the failed
+**Validate Deployment** entry sit two child events, in this order:
+
+- **Modify**: Succeeded (P1 added `costCenter`)
+- **'deny' Policy action**: Failed (P3 refused the request)
+
+![Activity log: Modify, then deny](screenshots/01-35-activity-log-modify-then-deny.png)
+
+That is the evaluation order from the docs, recorded in the audit trail. The
+entry's JSON carries the error code and the custom message:
+
+![RequestDisallowedByPolicy with the P3 message](screenshots/01-36-activity-log-deny-json.png)
+
+```
+"code": "RequestDisallowedByPolicy",
+"target": "vnet-p3-noowner",
+"message": "Resource 'vnet-p3-noowner' was disallowed by policy. Reasons:
+  'Every resource in this group needs an owner tag with the name of the
+  person responsible'."
+```
+
+`RequestDisallowedByPolicy` is the code to search for whenever a deployment
+fails on policy.
+
+**`vnet-p3-ok`** (`10.5.0.0/16`, only `owner=noble` entered) was created and
+ended up with **two** tags: the `owner` it was given and the `costCenter` P1
+added. Every rule was satisfied, so nothing blocked it.
+
+![vnet-p3-ok with only owner entered](screenshots/01-37-p3-ok-owner-tag-entered.png)
+
 ## Break it
 
 <!--
