@@ -33,7 +33,7 @@ Three things this lab sets out to answer:
 | # | My prediction | What actually happened |
 |---|---|---|
 | 1 | No. Nothing has been assigned that copies tags down, so a new resource starts with no tags. | Correct. `vnet-before` was created with no tags (step 3). |
-| 2 |  |  |
+| 2 | A new policy is not retroactive: existing resources are left as they are. | Correct for changes: `vnet-before` kept no tags. But it is not ignored either: compliance evaluation lists it as non-compliant within minutes (step 4). Fixing it takes a remediation task. |
 | 3 |  |  |
 
 ## Key ideas, from zero
@@ -201,6 +201,55 @@ own.
 Portal gotcha: the **Policy definition** picker stays empty ("No policies
 found") until **Scope** is set and confirmed with **Select**. Closing the scope
 panel any other way leaves the field blank.
+
+#### P1: inherit costCenter (Modify)
+
+Scope `sub-noble-seclab-001/rg-lab-governance-tagging`, definition **Inherit a
+tag from the resource group if missing**, version `1.*.*` (take minor
+updates automatically, never a new major version), Tag Name `costCenter`.
+
+![P1 parameters](screenshots/01-04-p1-parameters.png)
+
+The **Remediation** tab says it plainly: by default an assignment only takes
+effect on newly created resources, and existing ones are updated through a
+remediation task. The task is left off here on purpose, so the old network
+shows up as non-compliant first.
+
+![Remediation task left off](screenshots/01-05-p1-remediation-off.png)
+
+The **Managed identity** tab creates a system-assigned identity in East US
+and grants it **Contributor** on the resource group, because that is the role
+the built-in definition asks for.
+
+![P1's managed identity gets Contributor](screenshots/01-06-p1-managed-identity.png)
+
+A managed identity is an identity for a thing rather than a person. Nothing in
+Azure changes a resource unless some identity with permission makes the
+change, and P1 has to act when nobody is signed in. Azure holds and rotates
+its credential, so there is no password to leak. **System assigned** means it
+lives and dies with this one assignment; **user assigned** would be a
+standalone identity that several things can share.
+
+**Least-privilege note.** P1 only ever edits tags, and the built-in
+**Tag Contributor** role covers exactly that. Contributor can create, change
+and delete anything in the group. The scope is one resource group, so the
+exposure is small, but it is the over-permissioned non-human identity an
+access review exists to catch.
+
+![Review before create](screenshots/01-07-p1-review.png)
+
+**Result.** Within minutes, **Policy > Compliance** listed `P1 inherit
+costCenter` as non-compliant, and drilling in showed exactly one resource:
+`vnet-before`. The network was not changed and not deleted. It was reported.
+
+![Compliance overview with P1](screenshots/01-08-compliance-overview.png)
+
+![vnet-before flagged by P1](screenshots/01-09-p1-vnet-before-noncompliant.png)
+
+The P1 page itself still read *Not started* and *100%* while its own list
+already showed `vnet-before` evaluated as non-compliant. The summary tiles
+trail the per-resource results; refreshing a few minutes later brings them in
+line. **Create remediation task** stays greyed out until they do.
 
 ## Break it
 
