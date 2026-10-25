@@ -183,6 +183,25 @@ none of them. Prediction 1 held: a resource group's tags describe the group
 only. Nothing copies them to the resources inside until a policy is assigned
 to do it.
 
+### 4. Assign the policies
+
+**Policy > Assignments** was not empty before this lab assigned anything. Each
+subscription already carried an initiative called **ASC Default**: Microsoft
+Defender for Cloud assigns its default security benchmark to every
+subscription automatically. Its effects only audit (report), so it never
+blocks a request, and it is the source of the non-compliant count on the
+Policy overview before any lab rule existed.
+
+![Two initiatives already assigned by Defender for Cloud](screenshots/01-03-existing-assignments.png)
+
+An **initiative** is a bundle of policy definitions assigned as one. This lab
+assigns single policies instead, so each rule's effect can be watched on its
+own.
+
+Portal gotcha: the **Policy definition** picker stays empty ("No policies
+found") until **Scope** is set and confirmed with **Select**. Closing the scope
+panel any other way leaves the field blank.
+
 ## Break it
 
 <!--
