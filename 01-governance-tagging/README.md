@@ -251,6 +251,36 @@ already showed `vnet-before` evaluated as non-compliant. The summary tiles
 trail the per-resource results; refreshing a few minutes later brings them in
 line. **Create remediation task** stays greyed out until they do.
 
+#### Testing P1 on its own
+
+The plan first had every rule assigned before any new network was created.
+That would leave two rules able to touch the same tag, with no way to tell
+which one acted. Testing each rule as soon as it exists changes one thing at a
+time, so P1 got its own test before P2 existed.
+
+`vnet-p1-test`, address space `10.1.0.0/16` with subnet `default`
+`10.1.0.0/24` (kept apart from `vnet-before` so the two could later be peered
+without overlap), and **no tags** entered.
+
+![vnet-p1-test address space](screenshots/01-10-p1-test-address-space.png)
+
+![Tags tab left empty](screenshots/01-11-p1-test-no-tags.png)
+
+Once created, its Tags page showed `costCenter : it-lab`. Nobody typed it. P1
+rewrote the create request on the way in, before the network existed.
+
+![costCenter added by P1](screenshots/01-12-p1-test-costcenter-added.png)
+
+It carries **only** `costCenter`. The group's other five tags did not come
+with it, because P1 was assigned for one tag name. Inheriting five tags would
+take five assignments, or one initiative that bundles them.
+
+The network did not appear under **Policy > Compliance** straight away, even
+though the tag was there at once. Those are two different mechanisms: a
+`Modify` effect acts *inside* the request, instantly, while compliance results
+come from a separate evaluation that reports a new resource some minutes after
+it is created.
+
 ## Break it
 
 <!--
