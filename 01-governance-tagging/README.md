@@ -34,7 +34,7 @@ Three things this lab sets out to answer:
 |---|---|---|
 | 1 | No. Nothing has been assigned that copies tags down, so a new resource starts with no tags. | Correct. `vnet-before` was created with no tags (step 3). |
 | 2 | A new policy is not retroactive: existing resources are left as they are. | Correct for changes: `vnet-before` kept no tags. But it is not ignored either: compliance evaluation lists it as non-compliant within minutes (step 4). Fixing it takes a remediation task. |
-| 3 | P1 adds the tag before P2 checks, so the network is allowed. |  |
+| 3 | P1 adds the tag before P2 checks, so the network is allowed. | Correct. Modify runs before Deny (Test A); with P1 off, P2 blocked the same request (Test B). |
 
 ## Key ideas, from zero
 
@@ -378,6 +378,38 @@ showed **1 of 2** resources compliant. The non-compliant one in both is
 The overall tile stays at **0 out of 4** because a resource counts as compliant
 only if it passes *every* assigned policy, and the ASC Default initiative
 still flags all of them.
+
+#### Test B: P1 switched off, P2 on its own
+
+Test A passing had two possible explanations: P1 rescued the request, or P2
+was not live yet. To rule out the second, P1's **Policy enforcement** was set
+to **Do not enforce** at 10:35 PM. That mode keeps evaluating and reporting
+compliance but stops the effect from acting.
+
+![P1 set to Do not enforce](screenshots/01-24-p1-do-not-enforce.png)
+
+At 10:48 PM, `vnet-p2-control` (`10.3.0.0/16`, no tags) was tried. The portal's
+own **Review + create** check said *Validation passed*:
+
+![Portal validation passed](screenshots/01-25-control-validation-passed.png)
+
+Then **Create** failed: *"The template deployment failed because of policy
+violation."* The portal's form check does not run Azure Policy; the policy
+check happens when the request reaches Azure Resource Manager.
+
+![Deployment failed on policy](screenshots/01-26-control-deployment-failed.png)
+
+At 10:52 PM P1 went back to **Default (enforcement)**. The same network,
+still with no tags, was created at 10:53 carrying `costCenter : it-lab`.
+Turning the effect back on took effect within a minute; the 30-minute figure
+is a worst case, not a fixed delay.
+
+![P1 back on](screenshots/01-27-p1-enforcement-back-on.png)
+
+![vnet-p2-control created once P1 was back](screenshots/01-28-control-created-costcenter.png)
+
+Together, Tests A and B answer question 3: P2 is live and does block, and the
+only thing that got the untagged network past it was P1 adding the tag first.
 
 ## Break it
 
