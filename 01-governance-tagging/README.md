@@ -34,7 +34,7 @@ Three things this lab sets out to answer:
 |---|---|---|
 | 1 | No. Nothing has been assigned that copies tags down, so a new resource starts with no tags. | Correct. `vnet-before` was created with no tags (step 3). |
 | 2 | A new policy is not retroactive: existing resources are left as they are. | Correct for changes: `vnet-before` kept no tags. But it is not ignored either: compliance evaluation lists it as non-compliant within minutes (step 4). Fixing it takes a remediation task. |
-| 3 |  |  |
+| 3 | P1 adds the tag before P2 checks, so the network is allowed. |  |
 
 ## Key ideas, from zero
 
@@ -280,6 +280,72 @@ though the tag was there at once. Those are two different mechanisms: a
 `Modify` effect acts *inside* the request, instantly, while compliance results
 come from a separate evaluation that reports a new resource some minutes after
 it is created.
+
+#### P2: require costCenter (Deny)
+
+Searching the definition picker for `Require` returns hundreds of rules,
+because the search also matches descriptions. Filtering **Category** to
+**Tags** cuts it to four:
+
+![The four Require-a-tag built-ins](screenshots/01-13-p2-definition-tags-filter.png)
+
+| Built-in | Checks | Applies to |
+|---|---|---|
+| Require a tag on resources | the tag **exists**, any value | resources |
+| Require a tag and its value on resources | the tag exists **with one exact value** | resources |
+| Require a tag on resource groups | the tag exists | resource groups only |
+| Require a tag and its value on resource groups | exact value | resource groups only |
+
+P2 is the first one: `costCenter` must be present, whatever its value. The
+"and its value" variant would also block a network in a different cost centre.
+The resource-group variants exist because the resource rules do not evaluate
+resource groups at all.
+
+![P2 basics with name and description](screenshots/01-14-p2-basics.png)
+
+The **Description** is for admins reading the assignment later: what it does,
+why, what it works with, who owns it. The **non-compliance message** is for
+whoever gets blocked, so it says what is wrong and how to fix it.
+
+![P2 cannot remediate](screenshots/01-15-p2-no-remediation.png)
+
+**"This policy does not support remediation tasks."** Only effects that know
+the fix can go back and apply it: `Modify` (P1) and `DeployIfNotExists`.
+`Deny` only refuses requests, and `Audit` only reports. P2 can block a network
+with no `costCenter` but has no idea what value it should have.
+
+![P2's managed identity tab](screenshots/01-16-p2-managed-identity.png)
+
+**Finding: an identity nobody needed.** The **Managed identity** tab was left
+ticked, so P2 was created with a system-assigned identity even though the
+portal itself warns that the policy "does not contain any role definitions".
+The identity has no permissions and does nothing. It is still a non-human
+identity sitting in the directory with no purpose, and identity sprawl of
+exactly this kind is what access reviews have to clean up. It is removed
+during the code stage with `az policy assignment identity remove`.
+
+![P2 non-compliance message](screenshots/01-17-p2-noncompliance-message.png)
+
+![P2 review](screenshots/01-18-p2-review.png)
+
+![P1 and P2 assigned to the group](screenshots/01-19-assignments-p1-p2.png)
+
+#### The order Azure evaluates effects in
+
+Assignments have no priority over one another, and the order they were
+created in does not matter. What decides the order is the **effect**. On every
+create or update request, Azure Policy evaluates:
+
+1. **Disabled** rules are skipped.
+2. **Append** and **Modify** run and change the request.
+3. **Deny** checks the *changed* request.
+4. **Audit** records what it finds before the request goes to the resource
+   provider.
+5. After the resource provider succeeds, **AuditIfNotExists** and
+   **DeployIfNotExists** run.
+
+If any single Deny matches, the request fails. A Deny cannot be outvoted by
+another assignment; only an **exemption** lets a resource past it.
 
 ## Break it
 
