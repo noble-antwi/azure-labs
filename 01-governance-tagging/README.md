@@ -495,6 +495,39 @@ added. Every rule was satisfied, so nothing blocked it.
 
 ![vnet-p3-ok with only owner entered](screenshots/01-37-p3-ok-owner-tag-entered.png)
 
+![vnet-p3-ok ends up with owner and costCenter](screenshots/01-38-p3-ok-two-tags.png)
+
+#### P4: allowed locations (Deny), at subscription scope
+
+Searching definitions for `Allowed locations` shows the general rule beside
+service-specific ones (Cosmos DB, SQL, IoT Hub, API Management) and a separate
+**Allowed locations for resource groups**. The general rule checks resources
+only; resource groups need the second one.
+
+![Allowed locations and its variants](screenshots/01-39-p4-allowed-locations-variants.png)
+
+**Scope decision.** P1 to P3 sit on the resource group. P4 was deliberately
+assigned to the **whole subscription** `sub-noble-seclab-001`, leaving the
+resource group box empty, because a region rule only makes sense as a
+tenant-wide guardrail. Consequences accepted with it:
+
+- New resources anywhere in the subscription outside East US are refused.
+- Existing resources elsewhere are reported, not removed.
+- A later lab that needs a second region must add it to P4, or exclude its
+  resource group, first.
+
+![P4 basics at subscription scope](screenshots/01-40-p4-basics-subscription-scope.png)
+
+**Policy enforcement** has three modes:
+
+| Mode | Effect on create/update | Use it for |
+|---|---|---|
+| **Default (enforcement)** | applied to every resource in scope | normal rules (all four here) |
+| **Do not enforce** | not applied; compliance still reported | trying a rule out first (Test B) |
+| **Enroll** | applied only to scopes that have opted in through an *enrollment* | rolling a rule out in batches across a large estate |
+
+Enroll was greyed out for P1 to P3 but offered for P4.
+
 ## Break it
 
 <!--
