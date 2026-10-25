@@ -74,3 +74,9 @@ Simple structural views can go inline as Mermaid, which GitHub renders natively.
 18. Cost guardrail automation
 19. Conditional Access and PIM
 20. Full environment, built and destroyed from one template
+
+## Earlier work
+
+[noble-antwi/azure](https://github.com/noble-antwi/azure) (archived, 2024):
+Entra ID labs (Entra Connect, dynamic group membership, self-service password
+reset in a hybrid environment) and a web server on an Azure VM.
