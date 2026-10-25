@@ -32,7 +32,7 @@ Three things this lab sets out to answer:
 
 | # | My prediction | What actually happened |
 |---|---|---|
-| 1 | No. Nothing has been assigned that copies tags down, so a new resource starts with no tags. |  |
+| 1 | No. Nothing has been assigned that copies tags down, so a new resource starts with no tags. | Correct. `vnet-before` was created with no tags (step 3). |
 | 2 |  |  |
 | 3 |  |  |
 
@@ -48,6 +48,36 @@ Three things this lab sets out to answer:
 | **Remediation task** | A job that goes back and applies a `Modify` policy to resources that existed before it was assigned. |
 | **Managed identity** | An identity Azure creates for the policy assignment itself, so the policy has permission to edit resources. `Modify` policies need one; `Deny` and `Audit` do not. |
 | **Resource lock** | `CanNotDelete` (can change, cannot delete) or `ReadOnly` (cannot change or delete). Locks override role permissions. |
+
+### How the layers fit together
+
+```
+Microsoft account            who you are
+  └─ Directory (tenant)      users, groups, directory roles
+       └─ Tenant Root Group  top management group
+            └─ Subscription  billing boundary
+                 └─ Resource group
+                      └─ Resources
+```
+
+Azure has **two separate sets of roles**, and they do not overlap:
+
+| | Directory roles | Azure roles (RBAC) |
+|---|---|---|
+| Example | Global Administrator | Owner, Contributor, Reader |
+| Controls | Users, groups, licences, sign-in | Subscriptions, resource groups, resources |
+| Set in | Entra ID > Roles and administrators | Access control (IAM) on the scope |
+
+A Global Administrator cannot build a virtual network by default, and an Owner
+cannot create users. Azure roles, policies and locks all flow **down** the
+layers from the scope they are set on.
+
+A subscription created by signing up with a personal Microsoft account (an
+Outlook or Gmail address) places that account in its new directory as an
+external user, written `name_domain.com#EXT#@tenant.onmicrosoft.com`. It is the
+same account, recorded as a pointer to an identity that lives outside the
+directory. Deleting that entry does not delete the Microsoft account; it
+removes its access to everything in the directory.
 
 ## Architecture
 
@@ -125,7 +155,7 @@ cleanup.
 
 ### 2. Create the resource group with its tags
 
-`rg-lab-governance-tagging` in **East US**, in the dev subscription, with six
+`rg-lab-governance-tagging` in **East US**, in `sub-noble-seclab-001`, with six
 tags. Two of them do real work later: `costCenter` is the value P1 copies down
 to resources, and `owner` is the tag P3 demands.
 
@@ -136,6 +166,22 @@ sensitive; tag values are.** `Owner` and `owner` are the same tag, but
 `it-lab` and `IT-Lab` are different values, and a cost report grouped by
 value will split them. It also warns that tag data is replicated globally, so
 a tag must never hold anything secret or personal.
+
+### 3. Create vnet-before with no tags
+
+`vnet-before` in the same group and region, with the portal's default address
+space `10.0.0.0/16` and one subnet `default` at `10.0.0.0/24`. Everything on
+the **Security** tab stays off: Bastion, Azure Firewall and DDoS Network
+Protection all bill whether or not anything uses them, and DDoS Network
+Protection runs to thousands of dollars a month. The **Tags** tab is left
+empty on purpose.
+
+![vnet-before with no tags](screenshots/01-02-vnet-before-no-tags.png)
+
+**Tags: Add tags.** The network sits inside a group carrying six tags and has
+none of them. Prediction 1 held: a resource group's tags describe the group
+only. Nothing copies them to the resources inside until a policy is assigned
+to do it.
 
 ## Break it
 
