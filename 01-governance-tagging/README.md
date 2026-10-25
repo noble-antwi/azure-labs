@@ -651,6 +651,47 @@ satisfied P3, and the same request gave P1 its chance to add `costCenter`.
 **Any update to a non-compliant resource triggers its Modify policies**, so
 fixing the missing Deny tag fixed the Modify tag for free.
 
+### 7. Lock the resource group
+
+**Resource group > Settings > Locks > Add**: `lock-no-delete`, type
+**Delete** (the portal's name for `CanNotDelete`), note *Lab 01: blocks
+accidental deletion*.
+
+![Adding the lock](screenshots/01-56-add-lock.png)
+
+![Lock in place](screenshots/01-57-lock-in-place.png)
+
+The resource group list in the first screenshot also shows
+**NetworkWatcherRG**, which this lab never created. Azure makes it, with a
+Network Watcher for the region, automatically the first time a virtual network
+is created in a subscription and region.
+
+**Delete is blocked.** Deleting `vnet-p1-test` failed straight away, for the
+Owner, because the group's lock applies to everything inside it:
+
+![Cannot delete because there is a lock](screenshots/01-58-lock-blocks-delete.png)
+
+**Changes are not.** The first attempt to add `test = 1` failed, but the error
+named **P3 require owner**, not the lock: `vnet-p1-test` had no `owner` tag, so
+any update to it was refused. The Tags page's own error panel names the policy
+directly, which is quicker than the Activity log.
+
+![Change blocked by P3, not by the lock](screenshots/01-59-change-blocked-by-p3-not-lock.png)
+
+With `owner = noble` added in the same edit, the change went through under the
+lock:
+
+![Change allowed under a Delete lock](screenshots/01-60-change-allowed-under-lock.png)
+
+| Lock type | Change a resource | Delete a resource |
+|---|---|---|
+| **Delete** (`CanNotDelete`) | allowed | blocked |
+| **Read-only** (`ReadOnly`) | blocked | blocked |
+
+Locks bind everyone, Owners included; the only way past one is to remove it,
+which needs `Microsoft.Authorization/locks/delete` permission (Owner or User
+Access Administrator).
+
 ## Break it
 
 <!--
