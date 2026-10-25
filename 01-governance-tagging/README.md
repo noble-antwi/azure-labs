@@ -411,6 +411,39 @@ is a worst case, not a fixed delay.
 Together, Tests A and B answer question 3: P2 is live and does block, and the
 only thing that got the untagged network past it was P1 adding the tag first.
 
+**A design flaw P1 brings with it.** P1 stamps the group's `costCenter=it-lab`
+on everything created without one, so a resource built by someone in finance
+or marketing is billed to IT unless they think to override it. "If missing"
+means anyone who supplies their own value keeps it, but the default is wrong
+for everyone outside IT. Real tenants avoid this by giving each department its
+own resource group (each carrying its own `costCenter`), or by requiring the
+tag with an **allowed values** list instead of inheriting a single value.
+
+#### P3: require owner (Deny)
+
+Same built-in as P2, **Require a tag on resources**, with Tag Name `owner`.
+The Tags category holds many more built-ins than the four "Require" ones:
+add, append, inherit, and add-or-replace variants for resources, resource
+groups and subscriptions.
+
+![All built-ins in the Tags category](screenshots/01-29-tags-category-builtins.png)
+
+This time the **Create a Managed Identity** box was unticked, so P3 has no
+identity, which is right for a Deny.
+
+![P3 non-compliance message](screenshots/01-30-p3-noncompliance-message.png)
+
+![P3 review: no managed identity](screenshots/01-31-p3-review-no-identity.png)
+
+P1 and P3 look at **different tags**. P1 can only ever supply `costCenter`, so
+nothing rescues a request that lacks `owner`: P3 is a plain Deny with no
+Modify in front of it.
+
+![Compliance with P3 just assigned](screenshots/01-32-compliance-with-p3.png)
+
+Straight after assignment P3 read *Not started*, *100% (0 out of 0)*: it had
+not been evaluated against anything yet.
+
 ## Break it
 
 <!--
