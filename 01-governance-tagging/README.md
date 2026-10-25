@@ -528,6 +528,55 @@ tenant-wide guardrail. Consequences accepted with it:
 
 Enroll was greyed out for P1 to P3 but offered for P4.
 
+Allowed locations set to **East US** only, no managed identity, and a message
+written for subscription scope that tells the reader who can approve an
+exception:
+
+![P4 parameters](screenshots/01-41-p4-parameters-eastus.png)
+
+![P4 review](screenshots/01-42-p4-review.png)
+
+With all four rules in place, P4 read **Compliant, 6 of 6**: every existing
+resource in the subscription was already in East US. P1 and P2 read 4 of 5
+(only `vnet-before` lacks `costCenter`), and P3 1 of 5 (only `vnet-p3-ok`
+carries `owner`; the earlier networks predate the rule and were never given
+one).
+
+![Compliance with all four rules](screenshots/01-43-compliance-all-four.png)
+
+#### Testing P4
+
+`vnet-westus`: **West US**, `10.6.0.0/16`, tag `owner=noble` so that P3 had
+nothing to object to, leaving location as the only thing that could fail.
+
+![vnet-westus in West US](screenshots/01-44-p4-test-westus.png)
+
+![Deployment failed](screenshots/01-45-p4-test-deployment-failed.png)
+
+Because P4 sits on the subscription, its trail is in the **subscription's**
+Activity log, not only the resource group's. Under the failed **Validate
+Deployment**: **Modify** succeeded (P1 still added `costCenter`), then the
+**'deny' Policy action** failed. The JSON names the target and carries the P4
+message:
+
+![P4 deny in the subscription Activity log](screenshots/01-46-p4-activity-log-json.png)
+
+```
+"code": "RequestDisallowedByPolicy", "target": "vnet-westus",
+"message": "Resource 'vnet-westus' was disallowed by policy. Reasons:
+  'Resources in subscription sub-noble-seclab-001 must be created in East US.
+  Pick East US as the region, or ask the subscription owner (noble) to approve
+  another region.'"
+```
+
+P1 modified a request that was then refused anyway. Modify always runs first;
+it has no way of knowing a Deny further down will reject the result.
+
+The same log shows **Register Microsoft Policy Insights Resource Provider**:
+Azure registered the `Microsoft.PolicyInsights` provider on the subscription
+the first time a policy was assigned there, which is what produces the
+compliance data.
+
 ## Break it
 
 <!--
