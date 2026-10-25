@@ -1,5 +1,13 @@
 # Governance and tagging
 
+![How Azure Policy judged three requests](diagrams/policy-flow.svg)
+
+*Three real requests from this lab, run through four policies in the order
+Azure evaluates them: Modify first, then every Deny. One is created, two are
+refused. Built by [`scripts/diagrams/lab01_policy_flow.py`](../scripts/diagrams/lab01_policy_flow.py);
+video versions: [landscape](diagrams/policy-flow.mp4) ·
+[vertical](diagrams/policy-flow-vertical.mp4).*
+
 ## What this lab is
 
 Every Azure resource can carry **tags**: short `name = value` labels such as
@@ -80,11 +88,6 @@ directory. Deleting that entry does not delete the Microsoft account; it
 removes its access to everything in the directory.
 
 ## Architecture
-
-![Animated: three requests through the four policies](diagrams/policy-flow.svg)
-
-*Animated. Three create requests from this lab pass through the rules in the
-order Azure evaluates them. Built by `scripts/diagrams/lab01_policy_flow.py`.*
 
 ![Architecture](diagrams/architecture.png)
 

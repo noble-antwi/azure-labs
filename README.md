@@ -5,6 +5,11 @@ portal to understand what the service actually does, then again as Bicep to make
 it repeatable. Each one documents the architecture, the steps, and what came out
 of it.
 
+[![Lab 01: how Azure Policy judged three requests](01-governance-tagging/diagrams/policy-flow.svg)](01-governance-tagging/)
+
+*Latest: [lab 01, governance and tagging](01-governance-tagging/). Four Azure
+Policy rules and a lock, tested until they broke.*
+
 ## How each lab is structured
 
 | File or folder | Purpose |
