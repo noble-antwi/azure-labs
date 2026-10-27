@@ -777,17 +777,20 @@ tag only) was created seconds after P1 and P2 existed. It came out with **no
 yet. Rules belong in their own deployment, applied before the resources they
 govern.
 
-**2. Tag Contributor is enough for P1.** The `vnet-iac-test` Activity log shows
-P1's own managed identity (the only principal holding **Tag Contributor** on the
-group) running **Write tags: Succeeded** about 47 minutes after the first
-deployment, adding `costCenter`. The definition asks for Contributor; the narrow
-role did the job. The portal build's Contributor grant was wider than needed.
+**2. Tag Contributor is enough for P1.** A remediation task (`rem-p1-iac`, first
+run on 25 Oct) sent P1's own managed identity, the only principal holding **Tag
+Contributor** on the group, to fix `vnet-iac-test`. The Activity log records
+**Write tags: Succeeded** by that identity, adding `costCenter`. The definition
+asks for Contributor; the narrow role did the job. The portal build's
+Contributor grant was wider than needed.
 
 **3. Redeploying re-runs Modify.** Running the same deployment again the next
 day sent the network's tags as `{owner}` only, which on its own would have
 removed `costCenter`. By then P1 was live: it added `costCenter` back inside that
-same request. The remediation task created straight after (`rem-p1-iac`) found
-**0** resources left to fix.
+same request. Re-running the remediation task afterwards found **0** resources
+left to fix.
+
+![Remediation re-run: nothing left to fix](screenshots/01-64-iac-remediation-nothing-left.png)
 
 ## What I found
 
@@ -859,21 +862,33 @@ all free. This is the one lab that can be left running without worry.
 
 ## Teardown
 
-Order matters. The lock has to come off first, or the delete fails (that is
-the point of a lock). P4 sits on the **subscription**, so deleting the resource
-group does not remove it; it has to be deleted on its own, or it keeps
-blocking every other region in the subscription.
+Done 26 Oct, in this order:
+
+1. **Delete the resource group with the lock still on.** Refused: *"Resource
+   group rg-lab-governance-tagging has locks applied. Remove the locks before
+   deleting."* All five networks were still there: the lock is checked before
+   anything is deleted, so there is no half-deleted group.
+
+   ![Delete refused by the lock](screenshots/01-61-teardown-blocked-by-lock.png)
+
+2. **Remove the lock, delete the group.** Same for the `-iac` group.
+
+   ![Deleting](screenshots/01-62-teardown-deleting.png)
+
+3. **Check what survived.** P1, P2, P3, their identities and P1's role assignment
+   went with the groups. **Both P4 assignments were still there**, on the
+   subscription, still allowing only East US. They were deleted on their own.
+
+   ![Only ASC Default left](screenshots/01-63-teardown-only-asc-default-left.png)
+
+The same steps from the command line:
 
 ```bash
 az lock delete --name lock-no-delete --resource-group rg-lab-governance-tagging
-az group delete --name rg-lab-governance-tagging --yes --no-wait
-az group delete --name rg-lab-governance-tagging-iac --yes --no-wait
-az policy assignment list --scope /subscriptions/<subscription-id>   --query "[?displayName=='P4 eastus only'].name" -o tsv
-az policy assignment delete --name <name-from-above> --scope /subscriptions/<subscription-id>
+az group delete --name rg-lab-governance-tagging --yes
+az policy assignment list --query "[?starts_with(displayName,'P4')].{n:displayName, name:name}" -o table
+az policy assignment delete --name <name> --scope /subscriptions/<subscription-id>
 ```
 
-P1 to P3, their managed identities and P1's role assignment are scoped to the
-resource group and go with it. `NetworkWatcherRG` was created by Azure, not by
-this lab; it costs nothing and is reused by later network labs, so it stays.
-Confirm under **Policy > Assignments** that only the two ASC Default
-initiatives remain.
+`NetworkWatcherRG` was created by Azure, not by this lab; it costs nothing and
+later network labs reuse it, so it stays.
