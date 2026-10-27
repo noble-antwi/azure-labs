@@ -52,7 +52,10 @@ and a `.png` export so the README renders without the tool.
 
 Simple structural views can go inline as Mermaid, which GitHub renders natively.
 
-## Labs
+## Roadmap
+
+The current plan, built in order. Each planned folder states what that lab is
+for; the list grows as labs are built and larger projects follow.
 
 ### Foundations
 1. [Governance and tagging policy](01-governance-tagging/) · **done** (portal, Bicep, torn down)

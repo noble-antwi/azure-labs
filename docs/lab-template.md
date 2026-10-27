@@ -20,7 +20,7 @@ tutorial you followed. Examples:
 
 ## Architecture
 
-![Architecture](diagrams/architecture.png)
+<!-- Add ![Architecture](diagrams/architecture.png) once the diagram is drawn. -->
 
 <!--
 Draw it in draw.io using the Azure icon set (More Shapes > Networking > Azure).
@@ -87,12 +87,8 @@ az deployment group create \
 <!--
 The answer to the question above, in your own words. Include anything that
 surprised you, anything the documentation got wrong or left out, and the
-one sentence you would want to read back before the exam.
+one sentence you would want to read back later.
 -->
-
-## Exam relevance
-
-<!-- Which AZ-104 objective this maps to, and what a question on it looks like. -->
 
 ## Cost
 

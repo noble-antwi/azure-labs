@@ -825,35 +825,10 @@ on every request: **Modify**, then **'deny' Policy action**.
 - A **Delete** lock stops deletion and nothing else, for every user including
   Owners.
 
-**One sentence for the exam:** *Modify and Append change the request before
+**The one sentence to remember:** *Modify and Append change the request before
 Deny checks it, Deny can only block, only Modify and DeployIfNotExists can be
 remediated, and a remediation is just another update that every Deny rule
 still checks.*
-
-## Exam relevance
-
-AZ-104 domain **Manage Azure identities and governance**: manage tags,
-implement and manage Azure Policy, configure resource locks, manage resource
-groups.
-
-Typical questions this lab answers:
-
-- *Resources in RG1 must carry the department tag of their resource group.
-  What do you assign?* **Inherit a tag from the resource group if missing**
-  (Modify), plus a remediation task for existing resources.
-- *You assign a policy that requires a tag. What happens to existing resources
-  without it?* They are marked **non-compliant**; nothing is deleted or
-  changed.
-- *Which effects support remediation tasks?* **Modify** and
-  **DeployIfNotExists**.
-- *A Modify policy needs to change resources. What must the assignment have?*
-  A **managed identity** with a suitable role.
-- *Users must be able to change resources in RG1 but not delete them.* A
-  **CanNotDelete** (Delete) lock.
-- *Allowed locations is assigned, but a resource group was still created in
-  another region.* The rule does not cover resource groups; use **Allowed
-  locations for resource groups**.
-- *Tag names vs values:* names are case-insensitive, values case-sensitive.
 
 ## Cost
 
