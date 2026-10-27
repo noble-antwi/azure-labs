@@ -717,22 +717,77 @@ Every break was run inside the build above. In one place:
 
 ## Rebuild it as code
 
-Export the portal's template first to see what Azure created:
+**Why rebuild at all?** Clicking through the portal teaches what each setting
+does, but it cannot be repeated exactly, reviewed, or kept in Git. The same lab
+written as code can be rebuilt in seconds, read line by line, and diffed when it
+changes.
+
+### What the portal export does not capture
 
 ```bash
 az group export --name rg-lab-governance-tagging > exported-reference.json
 ```
 
-Then write `bicep/main.bicep` yourself and deploy to a clean group:
+[`bicep/exported-reference.json`](bicep/exported-reference.json) holds **only
+the five networks and their subnets**. No policy assignments, no lock. Those are
+*extension resources*: attached **to** the resource group, not **in** it, so a
+group export leaves them out. An exported template is not a backup of a
+group's governance.
+
+### The code
+
+| File | Deploys at | Builds |
+|---|---|---|
+| [`bicep/main.bicep`](bicep/main.bicep) | subscription | the resource group, and P4 (which lives on the subscription) |
+| [`bicep/modules/rg-governance.bicep`](bicep/modules/rg-governance.bicep) | resource group | P1 with its identity and role, P2, P3, the lock, one test network |
+
+Built-in policy and role IDs are looked up, not remembered:
 
 ```bash
-az group create --name rg-lab-governance-tagging-iac --location eastus \
-  --tags environment=lab purpose=lab lab=governance-tagging autoDelete=true
-
-az deployment group create \
-  --resource-group rg-lab-governance-tagging-iac \
-  --template-file bicep/main.bicep
+az policy definition list --query "[?displayName=='Allowed locations'].{name:displayName, guid:name}" -o table
+az role definition list --name "Tag Contributor" --query "[].name" -o tsv
 ```
+
+(`-o table` silently hides any column called `id`, hence `guid`.) Looking up
+caught a wrong ID that had been written from memory.
+
+The one deliberate change from the portal build: in the portal, P1's role was
+created invisibly on the Managed identity tab and was **Contributor**. In code the
+role assignment is its own resource, and it is **Tag Contributor**.
+
+```bash
+az bicep build --file main.bicep
+az deployment sub what-if --location eastus --template-file main.bicep
+az deployment sub create  --location eastus --template-file main.bicep --name lab01-iac
+```
+
+What-if listed eight creates and no changes to anything existing. The
+deployment finished in **10 seconds**.
+
+Signing in first needed `az login --tenant <tenant-id>`: Azure now enforces MFA
+for command-line management, and a plain `az login` with a personal Microsoft
+account stopped at the account step without ever prompting for MFA in the
+directory (`AADSTS50076`).
+
+### What the code build showed
+
+**1. Rules and resources in one deployment is a race.** `vnet-iac-test` (owner
+tag only) was created seconds after P1 and P2 existed. It came out with **no
+`costCenter`**, and P2 did not refuse it either: neither rule had taken effect
+yet. Rules belong in their own deployment, applied before the resources they
+govern.
+
+**2. Tag Contributor is enough for P1.** The `vnet-iac-test` Activity log shows
+P1's own managed identity (the only principal holding **Tag Contributor** on the
+group) running **Write tags: Succeeded** about 47 minutes after the first
+deployment, adding `costCenter`. The definition asks for Contributor; the narrow
+role did the job. The portal build's Contributor grant was wider than needed.
+
+**3. Redeploying re-runs Modify.** Running the same deployment again the next
+day sent the network's tags as `{owner}` only, which on its own would have
+removed `costCenter`. By then P1 was live: it added `costCenter` back inside that
+same request. The remediation task created straight after (`rem-p1-iac`) found
+**0** resources left to fix.
 
 ## What I found
 
