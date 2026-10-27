@@ -25,9 +25,9 @@ then has to be pulled back in a hurry.
 
 | # | My prediction | What actually happened |
 |---|---|---|
-| 1 |  |  |
-| 2 |  |  |
-| 3 |  |  |
+| 1 | Cool. |  |
+| 2 | It is first moved out of archive, through cold and cool to hot, and only then can be read. |  |
+| 3 | You pay for one day. |  |
 
 ## Key ideas, from zero
 
