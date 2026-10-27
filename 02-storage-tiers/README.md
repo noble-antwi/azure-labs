@@ -20,6 +20,9 @@ then has to be pulled back in a hurry.
    take, in time and money, to get it back?
 3. **What does moving a file to a colder tier too early cost?** Cool, cold and
    archive each have a minimum stay.
+4. **Once the account's master keys are switched off, who can still read the
+   files?** Owner manages the account, but reading data needs a separate data
+   role. (Added mid-lab after spotting that the portal quietly uses the key.)
 
 ### Predictions (written before building)
 
@@ -28,6 +31,7 @@ then has to be pulled back in a hurry.
 | 1 | Cool. |  |
 | 2 | It is first moved out of archive, through cold and cool to hot, and only then can be read. |  |
 | 3 | You pay for one day. |  |
+| 4 | *(made before part 4)* |  |
 
 ## Key ideas, from zero
 
