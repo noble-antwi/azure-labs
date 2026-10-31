@@ -31,7 +31,7 @@ then has to be pulled back in a hurry.
 | 1 | Cool. |  |
 | 2 | It is first moved out of archive, through cold and cool to hot, and only then can be read. | Half right. It cannot be read until it is brought back online (step 4), but there is no stepping through tiers: it goes straight to whichever online tier is chosen. |
 | 3 | You pay for one day. |  |
-| 4 | *(made before part 4)* |  |
+| 4 | No. Owner cannot open the files once keys are off. | Correct. Owner manages the account but has no data rights; reading needed a separate data role (step 10). |
 
 ## Key ideas, from zero
 
@@ -341,6 +341,63 @@ inside Cool's 30-day minimum: an early-deletion charge to look for on the bill
 (question 3).
 
 ![lc files uploaded; report-archive.txt back online](screenshots/02-34-lc-files-and-archive-online.png)
+
+### 9. Switch off the master keys
+
+Until now the portal read files with the account's **access key**, a master
+password for the whole account. **Configuration > Allow storage account key
+access: Disabled.** The portal warns that every Shared Key request, including
+SAS tokens signed with the key, will now be refused.
+
+![Key access disabled](screenshots/02-38-key-access-disabled.png)
+
+The container stopped listing anything, for the subscription **Owner**:
+
+> You do not have permissions to list the data using your user account with
+> Microsoft Entra ID.
+
+![Owner cannot read the data](screenshots/02-39-owner-cannot-read-data.png)
+
+Azure keeps two kinds of rights apart:
+
+| Kind | Roles | Controls |
+|---|---|---|
+| Management (control plane) | Owner, Contributor, Reader | the storage account: settings, networking, deletion |
+| Data (data plane) | Storage Blob Data Reader / Contributor / Owner | the files inside |
+
+Owner is all control plane. The key had been hiding the missing data role.
+
+### 10. Grant only what is needed
+
+**Storage Blob Data Reader**, assigned on the **`tiers` container** (not the
+account), to the one user, with an audit-style description: purpose, scope,
+why Reader and not Contributor, approver, review date, change reference. No ABAC
+condition; the container scope was narrow enough.
+
+![Assigning Storage Blob Data Reader](screenshots/02-40-assign-blob-data-reader.png)
+
+The user's access on the container now shows the difference between inherited
+and direct rights:
+
+![Owner inherited, Reader direct](screenshots/02-41-my-access-inherited-vs-direct.png)
+
+The first read, seconds after assigning, still failed: role assignments take a
+few minutes to reach the storage service. A few minutes later, with the
+container switched to **Microsoft Entra user account** authentication, all
+eight files listed and opened.
+
+![Entra authentication lists the files](screenshots/02-42-entra-auth-lists-files.png)
+
+Upload was refused, as it should be: *"This request is not authorized to
+perform this operation using this permission."* Reader reads; it cannot
+upload, delete, overwrite or even change a blob's tier.
+
+![Reader cannot upload](screenshots/02-43-reader-cannot-upload.png)
+
+The command-line status checks used for step 5 had been reading with the key
+too; they were switched to the same identity (`--auth-mode login`) and worked
+under the Reader role, so even the lab's own tooling ended up on least
+privilege.
 
 ## Break it
 
