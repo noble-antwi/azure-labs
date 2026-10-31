@@ -1,0 +1,2 @@
+Lifecycle test file 2
+Uploaded Hot. A rule should move it to Cool after 1 day, Cold after 2, Archive after 3.
