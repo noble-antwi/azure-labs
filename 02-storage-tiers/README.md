@@ -419,6 +419,50 @@ too; they were switched to the same identity (`--auth-mode login`) and worked
 under the Reader role, so even the lab's own tooling ended up on least
 privilege.
 
+### 11. Share one file safely: a user delegation SAS
+
+A **shared access signature (SAS)** is a URL with a permission slip built in:
+which file, which actions, from when, until when. Whoever holds the URL can use
+it, with no Azure account at all.
+
+| SAS type | Signed with | Works with key access off? |
+|---|---|---|
+| Account SAS, service SAS | the account key | no |
+| **User delegation SAS** | a key Azure issues to a signed-in Entra identity | **yes** |
+
+**Generate SAS** on `report-hot.txt`: signing method **User delegation key**
+(Account key was greyed out, with the warning that Shared Key requests would be
+denied), permission **Read**, valid for **one hour**, **HTTPS only**, no IP
+restriction, user-bound off.
+
+![User delegation SAS](screenshots/02-44-sas-user-delegation.png)
+
+A SAS can never grant more than its signer holds. The signer here has
+Storage Blob Data Reader, so a link signed by this user cannot write whatever
+boxes are ticked.
+
+Pasted into a private browser window with no sign-in, the URL returned the
+file:
+
+![The SAS opens with no sign-in](screenshots/02-45-sas-opens-incognito.png)
+
+The URL's query string carries the slip in plain view: `sp=r` (read),
+`st` and `se` (start and expiry, UTC), `skoid` (the signer's object ID), and
+`sig`, a signature computed over all of it. Changing **one character** of `sig`
+was refused:
+
+```
+AuthenticationFailed: Signature did not match.
+```
+
+![A tampered SAS is refused](screenshots/02-46-sas-tampered-refused.png)
+
+So a holder cannot widen `sp=r` to write or push `se` later; the only lever is
+the expiry, and the link dies on its own. The flip side: until it expires,
+anyone who gets the URL can use it, so a SAS URL is handled like a password.
+The account's **Configuration** page can cap every SAS's lifetime
+(*upper limit for SAS expiry*), a sensible default in a real tenant.
+
 ## Break it
 
 Every break ran inside the build:
@@ -432,6 +476,7 @@ Every break ran inside the build:
 | Read files with key access disabled, as Owner | refused | Owner is control plane only |
 | Read seconds after assigning Reader | refused | role assignments take minutes to arrive |
 | Upload as Storage Blob Data Reader | refused: *not authorized* | Reader cannot write |
+| SAS URL with one character of `sig` changed | refused: *Signature did not match* | the signature covers every field |
 
 ## Rebuild it as code
 
@@ -459,7 +504,10 @@ early-deletion charge should appear on the bill.
 **4. Owner is not data access.** With key access disabled, the subscription
 Owner could not list a single file. A data-plane role, Storage Blob Data
 Reader, scoped to one container, restored read access and nothing more:
-upload was still refused.
+upload was still refused. Sharing still worked without the key: a one-hour,
+read-only **user delegation SAS**, signed with Entra, opened the file in a
+browser with no sign-in, and a single altered character in its signature was
+refused.
 
 **Also learned:**
 
