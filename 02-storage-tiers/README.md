@@ -199,12 +199,148 @@ copy back online finishes.
 
 ![Both rehydrating](screenshots/02-21-both-rehydrating.png)
 
-Prediction: High within an hour, Standard several hours.
+Prediction: High within an hour, Standard several hours. High: correct.
 
 | File | Priority | Started (UTC) | Online (UTC) | Took |
 |---|---|---|---|---|
-| `report-archive.txt` | High | 19:10:03 | *pending* | |
+| `report-archive.txt` | High | 19:10:03 | ≈ 19:47 | **≈ 37 minutes** |
 | `report-archive-standard.txt` | Standard | 19:10:23 | *pending* | |
+
+Status was read every two minutes with `az storage blob show`, so the High
+finish time is accurate to about two minutes.
+
+### 6. A lifecycle rule
+
+Moving files by hand does not scale. **Lifecycle management** applies rules
+once a day: `tier-by-age` moves blobs to Cool **30 days** after their last
+modification and to Archive at **180 days**, both counted from the same last
+change (180 is not 30 + 180). Changing tier does not count as a modification;
+editing a file resets the clock.
+
+![Rule details](screenshots/02-22-lifecycle-rule-details.png)
+
+*Base blobs* means the current file, as opposed to snapshots or old versions;
+real policies often add separate rules to expire old versions, which pile up
+unseen. *Skip blobs rehydrated in the last 7 days* stops a rule from
+re-archiving a file someone has just brought back.
+
+![30 and 180 days](screenshots/02-23-lifecycle-30-180.png)
+![Prefix filter](screenshots/02-24-lifecycle-prefix.png)
+
+The prefix `tiers/lc-` limits the rule to files whose names start with `lc-`,
+so the four test files are untouched. A new rule *"can take up to 24 hours to
+go into effect"*, and at 30 days it would never fire within a one-day lab: the
+rule can be seen, not watched.
+
+![Rule enabled](screenshots/02-25-lifecycle-rule-enabled.png)
+
+**Code View** shows the same rule as JSON (`tierToCool`,
+`daysAfterModificationGreaterThan: 30`, `daysAfterLastTierChangeGreaterThan: 7`,
+`prefixMatch`): every click became a line of text that could live in Git.
+
+![The rule as JSON](screenshots/02-26-lifecycle-code-view.png)
+
+### 7. A fast rule to watch over a few days
+
+To see a rule actually act, a second rule, `fast-demo`, uses the shortest
+practical gaps: Cool after **1** day, Cold after **2**, Archive after **3**,
+on three new files `lc-1.txt` to `lc-3.txt` uploaded Hot. Days are the
+smallest unit lifecycle rules accept, and rules run once a day, so this plays
+out over about four days.
+
+![fast-demo: 1, 2, 3 days](screenshots/02-27-fast-demo-1-2-3.png)
+![fast-demo prefix](screenshots/02-28-fast-demo-prefix.png)
+
+Both rules match the `lc-` files. Where rules overlap, the cheapest action
+wins, so `fast-demo` decides.
+
+| File | Day 1 | Day 2 | Day 3 | Day 4 |
+|---|---|---|---|---|
+| `lc-1.txt` to `lc-3.txt` | *pending* | | | |
+
+### 8. Alerts on every tier change
+
+Instead of checking the portal, every tier change now pushes a notification to
+a phone:
+
+```
+storage account ──event──► Event Grid ──► Logic App ──HTTP POST──► ntfy.sh/<private topic> ──push──► phone
+```
+
+- **Event Grid** is Azure's event router. A storage account publishes events
+  such as `Microsoft.Storage.BlobTierChanged` (one blob changed tier) and
+  `Microsoft.Storage.LifecyclePolicyCompleted` (the daily rule run finished).
+- **Logic App** (Consumption plan, pay per run) subscribes with the trigger
+  *When a resource event occurs*: Azure's own resource events, as opposed to
+  *When an event occurs*, which is for events your own apps publish.
+- **ntfy** is a free publish/subscribe relay. The phone app subscribes to a
+  topic; anything POSTed to `https://ntfy.sh/<topic>` is pushed to it. Anyone
+  who knows a topic name can read it, so the topic is random and kept out of
+  this repository.
+
+Email was the first idea, but a Logic App cannot send mail through a personal
+Gmail account, so a push service was used instead.
+
+![Logic App hosting plans](screenshots/02-29-logic-app-plans.png)
+![Logic App basics](screenshots/02-30-logic-app-basics.png)
+![Trigger with both event types](screenshots/02-31-trigger-event-types.png)
+
+The trigger's connection uses **OAuth**, so it acts as the signed-in Owner. A
+production version would use a managed identity with only the rights it needs,
+the same least-privilege point as lab 01's Tag Contributor finding.
+
+The action is the built-in **HTTP** step. Its body must be inserted as an
+**expression** (an *fx* chip); pasted as plain text it would send the formula's
+own words.
+
+![HTTP action with the body expression](screenshots/02-32-http-body-expression.png)
+
+**Gotcha: the trigger failed silently.** After publishing, no event
+subscription existed and the trigger's history read *Failed*. The cause was
+the subscription itself: the **`Microsoft.EventGrid` resource provider was
+not registered** on `sub-noble-seclab-001`. Every Azure service is a resource
+provider that has to be switched on per subscription; common ones are
+registered automatically, Event Grid was not. Registering it and publishing
+again created the subscription.
+
+![Registering Microsoft.EventGrid](screenshots/02-33-eventgrid-provider.png)
+
+```
+az provider show -n Microsoft.EventGrid --query registrationState   →  Registered
+trigger status                                                       →  Succeeded (was Failed)
+event subscription                                                   →  WebHook, BlobTierChanged + LifecyclePolicyCompleted
+```
+
+**Test.** `report-hot.txt` was moved Hot → Cool by hand. The Logic App ran one
+second later and ntfy received the message. The test push arrived first:
+
+![Test push](screenshots/02-35-phone-test-push.png)
+
+The first real alert carried the raw event type and path:
+
+![First alert](screenshots/02-36-phone-first-alert.png)
+
+The event's own payload carries `previousTier`, `accessTier` and the `api`
+that made the change, so the body became a conditional expression:
+
+```
+if(equals(triggerBody()?['eventType'],'Microsoft.Storage.BlobTierChanged'),
+   concat(last(split(triggerBody()?['subject'],'/')), ': ',
+          triggerBody()?['data']?['previousTier'], ' -> ',
+          triggerBody()?['data']?['accessTier'], ' (by ', triggerBody()?['data']?['api'], ')'),
+   concat('Daily lifecycle run finished: ', string(triggerBody()?['data'])))
+```
+
+Moving the file back to Hot produced *report-hot.txt: Cool -> Hot (by
+SetBlobTier)*:
+
+![Formatted alert](screenshots/02-37-phone-formatted-alert.png)
+
+That move back also took a blob out of Cool minutes after it went in, well
+inside Cool's 30-day minimum: an early-deletion charge to look for on the bill
+(question 3).
+
+![lc files uploaded; report-archive.txt back online](screenshots/02-34-lc-files-and-archive-online.png)
 
 ## Break it
 
