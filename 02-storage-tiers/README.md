@@ -1,6 +1,17 @@
-# storage tiers
+# Storage tiers
+
+![Where a file lives, and what it takes to get it back](diagrams/tier-flow.svg)
+
+*Animated. A file walks down the tiers under a lifecycle rule, goes offline in
+Archive, is refused a read, and is rehydrated back to Hot; every tier change
+travels through Event Grid and a Logic App to a phone alert. Built by
+[`scripts/diagrams/lab02_tier_flow.py`](../scripts/diagrams/lab02_tier_flow.py).*
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
+
+> **Status:** built and tested in the portal. Still running: the Standard-priority
+> rehydration, the `fast-demo` lifecycle moves (days 2 to 4) and the
+> early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
 
@@ -53,15 +64,19 @@ then has to be pulled back in a hurry.
 
 ```mermaid
 graph LR
-  SUB[Subscription sub-noble-seclab-001] --> RG[rg-lab-storage-tiers]
-  RG --> SA["Storage account<br/>StorageV2 · Standard LRS<br/>default tier: Hot"]
-  SA --> C[container: tiers]
-  C --> H[report-hot.txt<br/>Hot]
-  C --> CO[report-cool.txt<br/>Cool]
-  C --> CD[report-cold.txt<br/>Cold]
-  C --> A[report-archive.txt<br/>Archive, offline]
-  A -. rehydrate .-> H
-  LM["Lifecycle rule<br/>cool at 30 days, archive at 180"] -.applies to.-> C
+  subgraph RG["rg-lab-storage-tiers (East US)"]
+    SA["stlabtiersnoble01<br/>StorageV2 · Standard LRS · default Hot<br/>key access OFF · anonymous OFF"]
+    C["container: tiers<br/>Storage Blob Data Reader for one user"]
+    LM["lifecycle rules<br/>tier-by-age 30 / 180 days<br/>fast-demo 1 / 2 / 3 days (lc-*)"]
+    LA["Logic App la-tier-alerts<br/>Consumption"]
+  end
+  SA --> C
+  C --> F["report-hot · cool · cold · archive<br/>report-archive-standard<br/>lc-1 · lc-2 · lc-3"]
+  LM -. moves blobs .-> C
+  SA -- BlobTierChanged<br/>LifecyclePolicyCompleted --> EG["Event Grid<br/>system topic"]
+  EG --> LA
+  LA -- HTTP POST --> N["ntfy.sh<br/>private topic"]
+  N -- push --> P["Phone"]
 ```
 
 ## What gets built
@@ -69,10 +84,15 @@ graph LR
 | Resource | SKU / setting | Why it's here |
 |---|---|---|
 | `rg-lab-storage-tiers` | resource group, East US | holds the lab |
-| Storage account | StorageV2, Standard, **LRS**, default tier Hot | LRS is the cheapest redundancy that supports archive |
+| `stlabtiersnoble01` | StorageV2, Standard, **LRS**, default tier Hot | LRS is the cheapest redundancy that supports archive |
 | Container `tiers` | private | no anonymous access |
-| Four small text files | one per tier | the same file in each tier, so only the tier differs |
-| Lifecycle management rule | cool at 30 days, archive at 180 | the automated version of moving tiers by hand |
+| Four report files | one per tier, identical content | only the tier differs |
+| `report-archive-standard.txt` | Archive | second archived file, to time Standard against High rehydration |
+| `lc-1.txt` to `lc-3.txt` | Hot at upload | watched by the fast lifecycle rule |
+| Lifecycle rules | `tier-by-age` 30/180 days, `fast-demo` 1/2/3 days | automated tiering, one realistic and one fast enough to watch |
+| Logic App `la-tier-alerts` | Consumption | turns tier-change events into phone alerts |
+| Event Grid system topic | created by the Logic App trigger | routes storage events |
+| Role assignment | Storage Blob Data Reader on `tiers` | data access once the master keys were switched off |
 
 ## Build it in the portal
 
@@ -401,49 +421,93 @@ privilege.
 
 ## Break it
 
-<!--
-Deliberately misconfigure one thing and record the failure mode. This is
-where most of the learning happens and it is the part people skip.
-What did you break, what error appeared, how did you diagnose it?
--->
+Every break ran inside the build:
+
+| Attempt | Result | Why |
+|---|---|---|
+| Open or download the archived file | refused: *not permitted on an archived blob* | Archive is offline storage |
+| Set the account's default tier to Archive | not offered | a default must be readable |
+| Phone alerts straight after publishing | trigger *Failed*, no event subscription | `Microsoft.EventGrid` provider not registered |
+| HTTP body pasted as text | the formula itself would have been sent | expressions must be inserted as *fx* |
+| Read files with key access disabled, as Owner | refused | Owner is control plane only |
+| Read seconds after assigning Reader | refused | role assignments take minutes to arrive |
+| Upload as Storage Blob Data Reader | refused: *not authorized* | Reader cannot write |
 
 ## Rebuild it as code
 
-Export the portal's template first to see what Azure created:
-
-```bash
-az group export --name rg-lab-storage-tiers > exported-reference.json
-```
-
-Then write `bicep/main.bicep` yourself and deploy to a clean group:
-
-```bash
-az group create --name rg-lab-storage-tiers-iac --location eastus \
-  --tags environment=lab purpose=lab lab=storage-tiers autoDelete=true
-
-az deployment group create \
-  --resource-group rg-lab-storage-tiers-iac \
-  --template-file bicep/main.bicep
-```
+Planned, after the waiting items below are recorded: the storage account
+(keys off, anonymous off, TLS 1.2), container, both lifecycle rules and the
+role assignment in Bicep. The lifecycle rules translate almost one to one: the
+portal's **Code View** already shows them as JSON.
 
 ## What I found
 
-<!--
-The answer to the question above, in your own words. Include anything that
-surprised you, anything the documentation got wrong or left out, and the
-one sentence you would want to read back later.
--->
+**1. The colder the tier, the cheaper to keep and the dearer to read.** From the
+reader's side Hot, Cool and Cold behave identically: the files opened straight
+away in all three. The difference is only on the bill, which will be read
+before question 1 is answered here.
+
+**2. Archive is offline, not slow.** An archived blob cannot be opened or
+downloaded at all. Getting it back means changing its tier, or copying it, to
+any online tier directly; there is no stepping through Cold and Cool. High
+priority took about **37 minutes** for a tiny file; Standard is still running.
+
+**3. Minimum stays are charged, not enforced.** Azure let a file leave Cool
+minutes after entering it. The 30-day minimum is billed, not blocked: the
+early-deletion charge should appear on the bill.
+
+**4. Owner is not data access.** With key access disabled, the subscription
+Owner could not list a single file. A data-plane role, Storage Blob Data
+Reader, scoped to one container, restored read access and nothing more:
+upload was still refused.
+
+**Also learned:**
+
+- The portal read the files with the account key until it was switched off:
+  *Authentication method: Access key* was on screen the whole time.
+- Workload presets on the create form reset earlier fields; the resource group
+  silently changed to `NetworkWatcherRG`.
+- Lifecycle rules count days from the last modification, run once a day, and
+  "can take up to 24 hours" to start. A 30-day rule cannot be watched inside a
+  one-day lab, hence the 1/2/3-day rule.
+- A new subscription may need resource providers registered before a service
+  works, and the failure can be silent.
+- Storage events carry `previousTier`, `accessTier` and the `api` that made the
+  change: enough for a useful one-line alert.
+
+**The one sentence to remember:** *Tiers trade the cost of keeping against the
+cost and speed of reading; Archive is offline until rehydrated, minimum stays
+are billed rather than enforced, and managing a storage account never implies
+reading its data.*
+
+## Still waiting on
+
+| Item | Expected | Where it goes |
+|---|---|---|
+| Standard rehydration of `report-archive-standard.txt` | up to 15 h after 19:10 UTC, 31 Oct | step 5 table |
+| `fast-demo` moving `lc-1` to `lc-3`: Cool, Cold, Archive | about days 2, 3 and 4 | step 7 table, phone screenshots |
+| Daily `LifecyclePolicyCompleted` alert | once per daily run | step 8 |
+| Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
+| Real per-tier costs | Cost Management, a few days in | question 1 |
 
 ## Cost
 
-A few cents. The files are tiny, and storage is billed per GB per month. The one
-trap is the **early deletion charge**: deleting the archived file at teardown
-bills its remaining 180 days, which for a file of a few kilobytes is a fraction
-of a cent. That charge is part of what this lab measures.
+A few cents. The files are tiny and storage is billed per GB per month. The
+items worth watching are the **early-deletion charges** (Cool's 30-day
+minimum was broken on purpose; the archived files will be deleted inside 180
+days), High-priority rehydration, and Logic App runs, which are billed per
+action and come to fractions of a cent here. Real figures from Cost Management
+will replace this paragraph.
 
 ## Teardown
 
+Deleting the resource group removes the storage account, the Logic App and its
+Event Grid subscription. Deleting archived blobs early bills the rest of their
+180 days; for a few kilobytes that is a fraction of a cent, and it is part of
+what this lab measures.
+
 ```bash
 az group delete --name rg-lab-storage-tiers --yes --no-wait
-az group delete --name rg-lab-storage-tiers-iac --yes --no-wait
 ```
+
+The ntfy topic needs no cleanup: with the Logic App gone it simply goes quiet.

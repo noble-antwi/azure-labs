@@ -59,7 +59,7 @@ for; the list grows as labs are built and larger projects follow.
 
 ### Foundations
 1. [Governance and tagging policy](01-governance-tagging/) · **done** (portal, Bicep, torn down)
-2. Storage account access tiers
+2. [Storage account access tiers](02-storage-tiers/) · **in progress**
 3. Virtual machine deep dive
 4. Custom RBAC role
 5. Entra ID users and groups at scale
