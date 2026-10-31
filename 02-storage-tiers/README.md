@@ -9,8 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Still running: the Standard-priority
-> rehydration, the `fast-demo` lifecycle moves (days 2 to 4) and the
+> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (days 2 to 4) and the
 > early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
@@ -219,15 +218,15 @@ copy back online finishes.
 
 ![Both rehydrating](screenshots/02-21-both-rehydrating.png)
 
-Prediction: High within an hour, Standard several hours. High: correct.
+Prediction: High within an hour, Standard several hours. Both correct: High ≈ 37 minutes, Standard ≈ 3 h 15 min, far inside its 15-hour ceiling.
 
 | File | Priority | Started (UTC) | Online (UTC) | Took |
 |---|---|---|---|---|
 | `report-archive.txt` | High | 19:10:03 | ≈ 19:47 | **≈ 37 minutes** |
-| `report-archive-standard.txt` | Standard | 19:10:23 | *pending* | |
+| `report-archive-standard.txt` | Standard | 19:10:23 | ≈ 22:21 to 22:25 | **≈ 3 h 15 min** |
 
 Status was read every two minutes with `az storage blob show`, so the High
-finish time is accurate to about two minutes.
+finish time is accurate to about two minutes; Standard was checked every five.
 
 ### 6. A lifecycle rule
 
@@ -495,7 +494,7 @@ before question 1 is answered here.
 **2. Archive is offline, not slow.** An archived blob cannot be opened or
 downloaded at all. Getting it back means changing its tier, or copying it, to
 any online tier directly; there is no stepping through Cold and Cool. High
-priority took about **37 minutes** for a tiny file; Standard is still running.
+priority took about **37 minutes** for a tiny file and Standard about **3 hours 15 minutes**: roughly five times longer, for the same 150-byte file.
 
 **3. Minimum stays are charged, not enforced.** Azure let a file leave Cool
 minutes after entering it. The 30-day minimum is billed, not blocked: the
@@ -532,7 +531,6 @@ reading its data.*
 
 | Item | Expected | Where it goes |
 |---|---|---|
-| Standard rehydration of `report-archive-standard.txt` | up to 15 h after 19:10 UTC, 31 Oct | step 5 table |
 | `fast-demo` moving `lc-1` to `lc-3`: Cool, Cold, Archive | about days 2, 3 and 4 | step 7 table, phone screenshots |
 | Daily `LifecyclePolicyCompleted` alert | once per daily run | step 8 |
 | Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
