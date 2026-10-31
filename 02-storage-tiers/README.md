@@ -183,6 +183,29 @@ the **two** ways back: change the blob's tier, or copy it to a new blob in an
 online tier. Neither steps through Cold and Cool on the way: the target can be
 any online tier directly.
 
+### 5. Rehydrate: High versus Standard priority
+
+A second file, `report-archive-standard.txt`, was archived so both speeds could
+run side by side. Each was moved back to **Hot** with **Change tier**, one at
+each **rehydrate priority**. The portal warns: *"Rehydrating a blob from
+Archive to Hot or Cool may take several hours to complete."*
+
+![High priority](screenshots/02-19-rehydrate-high.png)
+![Standard priority](screenshots/02-20-rehydrate-standard.png)
+
+Both started at 19:10 UTC (20 seconds apart) and immediately read
+**Archive (rehydrating to Hot)**: still archive, still unreadable, until the
+copy back online finishes.
+
+![Both rehydrating](screenshots/02-21-both-rehydrating.png)
+
+Prediction: High within an hour, Standard several hours.
+
+| File | Priority | Started (UTC) | Online (UTC) | Took |
+|---|---|---|---|---|
+| `report-archive.txt` | High | 19:10:03 | *pending* | |
+| `report-archive-standard.txt` | Standard | 19:10:23 | *pending* | |
+
 ## Break it
 
 <!--
