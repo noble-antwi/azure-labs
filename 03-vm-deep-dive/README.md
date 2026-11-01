@@ -28,9 +28,9 @@ manages it without SSH, and then tests the two ways of "turning it off".
 
 | # | My prediction | What actually happened |
 |---|---|---|
-| 1 |  |  |
-| 2 |  |  |
-| 3 |  |  |
+| 1 | When the VM is off, the disk still costs money (not sure what else). |  |
+| 2 | Shutting down from inside Linux stops the compute charge; only the disk keeps billing. |  |
+| 3 | A file on the temporary disk (`/mnt`) does not survive: it is ephemeral storage. |  |
 
 ## Key ideas, from zero
 
@@ -104,17 +104,17 @@ What did you break, what error appeared, how did you diagnose it?
 Export the portal's template first to see what Azure created:
 
 ```bash
-az group export --name rg-lab-vm-deep-dive > exported-reference.json
+az group export --name rg-lab-vm > exported-reference.json
 ```
 
 Then write `bicep/main.bicep` yourself and deploy to a clean group:
 
 ```bash
-az group create --name rg-lab-vm-deep-dive-iac --location eastus \
+az group create --name rg-lab-vm-iac --location eastus \
   --tags environment=lab purpose=lab lab=vm-deep-dive autoDelete=true
 
 az deployment group create \
-  --resource-group rg-lab-vm-deep-dive-iac \
+  --resource-group rg-lab-vm-iac \
   --template-file bicep/main.bicep
 ```
 
@@ -136,6 +136,6 @@ the lab to cents.
 ## Teardown
 
 ```bash
-az group delete --name rg-lab-vm-deep-dive --yes --no-wait
-az group delete --name rg-lab-vm-deep-dive-iac --yes --no-wait
+az group delete --name rg-lab-vm --yes --no-wait
+az group delete --name rg-lab-vm-iac --yes --no-wait
 ```
