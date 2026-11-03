@@ -61,22 +61,11 @@ then has to be pulled back in a hurry.
 
 ## Architecture
 
-```mermaid
-graph LR
-  subgraph RG["rg-lab-storage-tiers (East US)"]
-    SA["stlabtiersnoble01<br/>StorageV2 · Standard LRS · default Hot<br/>key access OFF · anonymous OFF"]
-    C["container: tiers<br/>Storage Blob Data Reader for one user"]
-    LM["lifecycle rules<br/>tier-by-age 30 / 180 days<br/>fast-demo 1 / 2 / 3 days (lc-*)"]
-    LA["Logic App la-tier-alerts<br/>Consumption"]
-  end
-  SA --> C
-  C --> F["report-hot · cool · cold · archive<br/>report-archive-standard<br/>lc-1 · lc-2 · lc-3"]
-  LM -. moves blobs .-> C
-  SA -- BlobTierChanged<br/>LifecyclePolicyCompleted --> EG["Event Grid<br/>system topic"]
-  EG --> LA
-  LA -- HTTP POST --> N["ntfy.sh<br/>private topic"]
-  N -- push --> P["Phone"]
-```
+![Lab 02 architecture](diagrams/architecture.png)
+
+*Source: [`diagrams/architecture.drawio`](diagrams/architecture.drawio), editable in
+[draw.io](https://app.diagrams.net). Rendered with
+[`scripts/diagrams/render_drawio.py`](../scripts/diagrams/render_drawio.py).*
 
 ## What gets built
 

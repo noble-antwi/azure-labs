@@ -1,0 +1,134 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Lab 02 architecture" id="lab02-architecture">
+    <mxGraphModel dx="1420" dy="920" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1420" pageHeight="920" background="#060D1F" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;font style=&quot;font-size:24px&quot; color=&quot;#FFFFFF&quot;&gt;&lt;b&gt;Lab 02 · Storage tiers&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;Where a file lives, what it costs to keep, and what it takes to get it back&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="30" y="22" width="760" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Subscription -->
+        <mxCell id="sub" value="Azure subscription" style="rounded=1;arcSize=2;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#2DD4E8;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=52;spacingTop=12;fontSize=14;fontStyle=1;fontColor=#2DD4E8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="30" y="100" width="1000" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="sub-icon" value="" style="image;aspect=fixed;labelBackgroundColor=none;html=1;points=[];image=img/lib/azure2/general/Subscriptions.svg;" vertex="1" parent="1">
+          <mxGeometry x="44" y="110" width="28" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- Resource group -->
+        <mxCell id="rg" value="rg-lab-storage-tiers · East US&lt;br&gt;&lt;span style=&quot;font-weight:normal;font-size:12px;color:#8FA3C0&quot;&gt;environment=lab · purpose=lab · lab=storage-tiers · autoDelete=true&lt;/span&gt;" style="rounded=1;arcSize=2;whiteSpace=wrap;html=1;fillColor=#0A1730;strokeColor=#1F3A66;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=52;spacingTop=8;fontSize=14;fontStyle=1;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="58" y="150" width="946" height="716" as="geometry" />
+        </mxCell>
+        <mxCell id="rg-icon" value="" style="image;aspect=fixed;labelBackgroundColor=none;html=1;points=[];image=img/lib/azure2/general/Resource_Groups.svg;" vertex="1" parent="1">
+          <mxGeometry x="72" y="160" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Storage account -->
+        <mxCell id="sa" value="&lt;b&gt;stlabtiersnoble01&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;StorageV2 · Standard LRS&lt;br&gt;default tier: Hot&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#FF6B5E&quot;&gt;● key access OFF&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#FF6B5E&quot;&gt;● anonymous access OFF&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#2BD99F&quot;&gt;● TLS 1.2 minimum&lt;/font&gt;" style="image;aspect=fixed;labelBackgroundColor=none;html=1;points=[];image=img/lib/azure2/storage/Storage_Accounts.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="140" y="250" width="70" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Container -->
+        <mxCell id="ctr" value="Container: tiers · private" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;fillColor=#0E2140;strokeColor=#2DD4E8;strokeWidth=1.5;verticalAlign=top;align=left;spacingLeft=14;spacingTop=8;fontSize=13;fontStyle=1;fontColor=#2DD4E8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="300" y="210" width="430" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hot" value="&lt;b&gt;report-hot&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#FFB3AB&quot;&gt;Hot · no minimum&lt;/font&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#3A1418;strokeColor=#FF6B5E;fontSize=11;fontColor=#FFFFFF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="315" y="248" width="196" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="b-cool" value="&lt;b&gt;report-cool&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#9FEAF3&quot;&gt;Cool · 30-day minimum&lt;/font&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#0E2F3D;strokeColor=#2DD4E8;fontSize=11;fontColor=#FFFFFF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="519" y="248" width="196" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="b-cold" value="&lt;b&gt;report-cold&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#AFCBFF&quot;&gt;Cold · 90-day minimum&lt;/font&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#142A55;strokeColor=#5B9BFF;fontSize=11;fontColor=#FFFFFF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="315" y="306" width="196" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="b-arch" value="&lt;b&gt;report-archive&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#D3C4FF&quot;&gt;Archive → High: ~37 min&lt;/font&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#241E3D;strokeColor=#A78BFA;fontSize=11;fontColor=#FFFFFF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="519" y="306" width="196" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="b-arch-std" value="&lt;b&gt;report-archive-standard&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#D3C4FF&quot;&gt;Archive → Standard rehydration: ~3 h 15 min · offline until then&lt;/font&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#241E3D;strokeColor=#A78BFA;fontSize=11;fontColor=#FFFFFF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="315" y="364" width="400" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="b-lc" value="&lt;b&gt;lc-1 · lc-2 · lc-3&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#FFE1A3&quot;&gt;Hot → Cool → Cold → Archive, one step per daily run&lt;/font&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#3A2E0E;strokeColor=#FFC04D;fontSize=11;fontColor=#FFFFFF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="315" y="422" width="400" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- Lifecycle management -->
+        <mxCell id="lcm" value="&lt;b&gt;&lt;font color=&quot;#FFC04D&quot;&gt;Lifecycle management&lt;/font&gt;&lt;/b&gt; &lt;font color=&quot;#8FA3C0&quot;&gt;· runs once a day&lt;/font&gt;&lt;br&gt;tier-by-age: Cool after 30 days · Archive after 180&lt;br&gt;fast-demo (prefix lc-): Cool 1 day · Cold 2 · Archive 3" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#221B08;strokeColor=#FFC04D;strokeWidth=1.5;fontSize=12;fontColor=#E6EEF8;align=left;spacingLeft=14;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="300" y="570" width="430" height="84" as="geometry" />
+        </mxCell>
+
+        <!-- Role assignment -->
+        <mxCell id="rbac" value="&lt;b&gt;Storage Blob Data Reader&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;one user · scope: container&lt;br&gt;read only, no upload or delete&lt;/font&gt;" style="image;aspect=fixed;labelBackgroundColor=none;html=1;points=[];image=img/lib/azure2/identity/Users.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="842" y="407" width="56" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Alert pipeline -->
+        <mxCell id="eg" value="&lt;b&gt;Event Grid&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;system topic&lt;/font&gt;" style="image;aspect=fixed;labelBackgroundColor=none;html=1;points=[];image=img/lib/azure2/integration/System_Topic.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="440" y="750" width="56" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="la" value="&lt;b&gt;la-tier-alerts&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;Logic App · Consumption&lt;/font&gt;" style="image;aspect=fixed;labelBackgroundColor=none;html=1;points=[];image=img/lib/azure2/integration/Logic_Apps.svg;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="700" y="756" width="56" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="evt-label" value="&lt;font color=&quot;#2DD4E8&quot;&gt;BlobTierChanged · LifecyclePolicyCompleted&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="104" y="752" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Outside Azure -->
+        <mxCell id="net" value="Internet · outside Azure" style="rounded=1;arcSize=2;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#5A6B85;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=16;spacingTop=12;fontSize=14;fontStyle=1;fontColor=#8FA3C0;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="100" width="330" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="sas" value="&lt;b&gt;&lt;font color=&quot;#2BD99F&quot;&gt;Anyone with the SAS URL&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;user delegation SAS, signed with Entra&lt;br&gt;read report-hot · 1 hour · HTTPS only&lt;br&gt;one changed character: refused&lt;/font&gt;" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#0B2A22;strokeColor=#2BD99F;strokeWidth=1.5;fontSize=11;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="236" width="270" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="ntfy" value="&lt;b&gt;ntfy.sh&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;private topic&lt;/font&gt;" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;fillColor=#0E2F3D;strokeColor=#2DD4E8;strokeWidth=1.5;fontSize=12;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="750" width="118" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="phone" value="&lt;b&gt;📱 Phone&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#8FA3C0&quot;&gt;push alert&lt;/font&gt;" style="rounded=1;arcSize=14;whiteSpace=wrap;html=1;fillColor=#0E2F3D;strokeColor=#2DD4E8;strokeWidth=1.5;fontSize=12;fontColor=#E6EEF8;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="750" width="110" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="&lt;b&gt;Key&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#2BD99F&quot;&gt;━━&lt;/font&gt; data access&lt;br&gt;&lt;font color=&quot;#FFC04D&quot;&gt;┅┅&lt;/font&gt; automation&lt;br&gt;&lt;font color=&quot;#2DD4E8&quot;&gt;━━&lt;/font&gt; event and alert path&lt;br&gt;&lt;br&gt;&lt;b&gt;Tiers&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#FF6B5E&quot;&gt;■&lt;/font&gt; Hot  &lt;font color=&quot;#2DD4E8&quot;&gt;■&lt;/font&gt; Cool  &lt;font color=&quot;#5B9BFF&quot;&gt;■&lt;/font&gt; Cold  &lt;font color=&quot;#A78BFA&quot;&gt;■&lt;/font&gt; Archive" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#0A1730;strokeColor=#1F3A66;fontSize=12;fontColor=#E6EEF8;align=left;verticalAlign=top;spacingLeft=14;spacingTop=10;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="440" width="270" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e-sa-ctr" value="holds" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeColor=#2DD4E8;strokeWidth=2;fontColor=#8FA3C0;labelBackgroundColor=#0A1730;fontFamily=Segoe UI;exitX=1;exitY=0.5;entryX=0;entryY=0.25;" edge="1" parent="1" source="sa" target="ctr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-lcm" value="moves blobs" style="endArrow=block;endFill=1;dashed=1;html=1;fontSize=11;strokeColor=#FFC04D;strokeWidth=2;fontColor=#FFC04D;labelBackgroundColor=#0A1730;fontFamily=Segoe UI;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="lcm" target="ctr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-rbac" value="read" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeColor=#2BD99F;strokeWidth=2;fontColor=#2BD99F;labelBackgroundColor=#0A1730;fontFamily=Segoe UI;exitX=0;exitY=0.5;entryX=1;entryY=0.75;" edge="1" parent="1" source="rbac" target="ctr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sas" value="read one file" style="endArrow=block;endFill=1;dashed=1;html=1;fontSize=11;strokeColor=#2BD99F;strokeWidth=2;fontColor=#2BD99F;labelBackgroundColor=#060D1F;fontFamily=Segoe UI;exitX=0;exitY=0.5;entryX=1;entryY=0.25;" edge="1" parent="1" source="sas" target="ctr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="275" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-sa-eg" value="" style="endArrow=block;endFill=1;html=1;strokeColor=#2DD4E8;strokeWidth=2;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="sa" target="eg">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="96" y="278" />
+              <mxPoint x="96" y="778" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-eg-la" value="trigger" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeColor=#2DD4E8;strokeWidth=2;fontColor=#8FA3C0;labelBackgroundColor=#0A1730;fontFamily=Segoe UI;" edge="1" parent="1" source="eg" target="la">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-la-ntfy" value="HTTP POST" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeColor=#2DD4E8;strokeWidth=2;fontColor=#8FA3C0;labelBackgroundColor=#060D1F;fontFamily=Segoe UI;" edge="1" parent="1" source="la" target="ntfy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ntfy-phone" value="push" style="endArrow=block;endFill=1;html=1;fontSize=11;strokeColor=#2DD4E8;strokeWidth=2;fontColor=#8FA3C0;labelBackgroundColor=#060D1F;fontFamily=Segoe UI;" edge="1" parent="1" source="ntfy" target="phone">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
