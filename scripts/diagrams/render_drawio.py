@@ -1,6 +1,6 @@
-import json, subprocess, sys, html, os
 # Renders a .drawio file to PNG with headless Edge and the diagrams.net viewer.
 # Usage: python render_drawio.py <in.drawio> <out.png> <width> <height>
+import json, subprocess, sys, html, os
 src, out, w, h = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
 xml = open(src, encoding="utf-8").read()
 cfg = {"xml": xml, "toolbar": "", "nav": False, "lightbox": False, "border": 0, "resize": False, "zoom": 1}
