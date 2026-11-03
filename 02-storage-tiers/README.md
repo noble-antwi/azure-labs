@@ -9,7 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool done; Cold and Archive to come) and the
+> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool and Cold done; Archive to come) and the
 > early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
@@ -277,7 +277,7 @@ wins, so `fast-demo` decides.
 |---|---|---|
 | 31 Oct, 22:55 | stayed Hot | nothing to move: the files were under a day old |
 | 1 Nov, 22:26 | **Hot to Cool**, all three | `tierToCool` 3 of 3 succeeded |
-| 2 Nov | *pending: Cold* | |
+| 2 Nov, 22:26 | **Cool to Cold**, all three | `tierToCold` 3 of 3 succeeded |
 | 3 Nov | *pending: Archive* | |
 
 The first move arrived on the phone as it happened: three tier-change alerts
@@ -287,6 +287,7 @@ alerts show the lifecycle engine changing tiers through the same
 automated.
 
 ![First lifecycle moves, as phone alerts](screenshots/02-47-phone-first-lifecycle-moves.png)
+![Second run: Cool to Cold](screenshots/02-48-phone-cool-to-cold.png)
 
 ### 8. Alerts on every tier change
 
@@ -542,7 +543,7 @@ reading its data.*
 
 | Item | Expected | Where it goes |
 |---|---|---|
-| `fast-demo` moving `lc-1` to `lc-3` to Cold, then Archive | daily runs on 2 and 3 Nov | step 7 table, phone screenshots |
+| `fast-demo` moving `lc-1` to `lc-3` to Archive | daily run on 3 Nov, about 22:26 UTC | step 7 table, phone screenshots |
 | Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
 | Real per-tier costs | Cost Management, a few days in | question 1 |
 
