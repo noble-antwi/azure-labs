@@ -268,6 +268,7 @@ wins, so `fast-demo` decides.
 | 1 Nov, 22:26 | **Hot to Cool**, all three | `tierToCool` 3 of 3 succeeded |
 | 2 Nov, 22:26 | **Cool to Cold**, all three | `tierToCold` 3 of 3 succeeded |
 | 3 Nov, 22:26 | **nothing moved**, stayed Cold | every count 0: see below |
+| 4 Nov, 22:26 | nothing moved | ran 2 minutes after the rule change, still on the old rule |
 | 5 Nov | *pending: Archive* (condition removed) | |
 
 The first move arrived on the phone as it happened: three tier-change alerts
