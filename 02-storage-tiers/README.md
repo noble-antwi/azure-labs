@@ -9,7 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool and Cold done; Archive to come) and the
+> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool and Cold done; Archive held back by a 7-day condition, about 10 Nov) and the
 > early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
@@ -267,7 +267,8 @@ wins, so `fast-demo` decides.
 | 31 Oct, 22:55 | stayed Hot | nothing to move: the files were under a day old |
 | 1 Nov, 22:26 | **Hot to Cool**, all three | `tierToCool` 3 of 3 succeeded |
 | 2 Nov, 22:26 | **Cool to Cold**, all three | `tierToCold` 3 of 3 succeeded |
-| 3 Nov | *pending: Archive* | |
+| 3 Nov, 22:26 | **nothing moved**, stayed Cold | every count 0: see below |
+| about 10 Nov | *pending: Archive* | |
 
 The first move arrived on the phone as it happened: three tier-change alerts
 at the same minute, then the run's summary about **30 minutes later**. The
@@ -277,6 +278,24 @@ automated.
 
 ![First lifecycle moves, as phone alerts](screenshots/02-47-phone-first-lifecycle-moves.png)
 ![Second run: Cool to Cold](screenshots/02-48-phone-cool-to-cold.png)
+
+**Why Archive did not happen on day 3.** The rule's JSON shows the portal had
+added a second condition to the Archive action:
+
+```json
+"tierToArchive": {
+  "daysAfterModificationGreaterThan": 3,
+  "daysAfterLastTierChangeGreaterThan": 7
+}
+```
+
+That is the portal's *skip blobs rehydrated in the last 7 days* option, on by
+default. It exists so a file someone just pulled back out of Archive is not
+archived again the next night. But it counts **any** tier change, and the files
+moved to Cold on 2 Nov, so Archive waits until 7 days after that. The rule did
+exactly what it said; the form just said more than it showed.
+
+![Third run: nothing to archive](screenshots/02-49-phone-archive-skipped.png)
 
 ### 8. Alerts on every tier change
 
@@ -518,6 +537,9 @@ refused.
 - Lifecycle rules count days from the last modification, run once a day, and
   "can take up to 24 hours" to start. A 30-day rule cannot be watched inside a
   one-day lab, hence the 1/2/3-day rule.
+- A lifecycle rule's real conditions live in its JSON. The portal's
+  *skip if rehydrated* box added `daysAfterLastTierChangeGreaterThan: 7` to
+  Archive, which also delays Archive after an ordinary Cool or Cold move.
 - A new subscription may need resource providers registered before a service
   works, and the failure can be silent.
 - Storage events carry `previousTier`, `accessTier` and the `api` that made the
@@ -532,7 +554,7 @@ reading its data.*
 
 | Item | Expected | Where it goes |
 |---|---|---|
-| `fast-demo` moving `lc-1` to `lc-3` to Archive | daily run on 3 Nov, about 22:26 UTC | step 7 table, phone screenshots |
+| `fast-demo` moving `lc-1` to `lc-3` to Archive | first daily run more than 7 days after 2 Nov 22:26 UTC, about 10 Nov | step 7 table, phone screenshots |
 | Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
 | Real per-tier costs | Cost Management, a few days in | question 1 |
 
