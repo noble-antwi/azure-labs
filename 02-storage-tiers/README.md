@@ -9,7 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool and Cold done; Archive held back by a 7-day condition, about 10 Nov) and the
+> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool and Cold done; Archive due about 5 Nov) and the
 > early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
@@ -268,7 +268,7 @@ wins, so `fast-demo` decides.
 | 1 Nov, 22:26 | **Hot to Cool**, all three | `tierToCool` 3 of 3 succeeded |
 | 2 Nov, 22:26 | **Cool to Cold**, all three | `tierToCold` 3 of 3 succeeded |
 | 3 Nov, 22:26 | **nothing moved**, stayed Cold | every count 0: see below |
-| about 10 Nov | *pending: Archive* | |
+| 5 Nov | *pending: Archive* (condition removed) | |
 
 The first move arrived on the phone as it happened: three tier-change alerts
 at the same minute, then the run's summary about **30 minutes later**. The
@@ -296,6 +296,11 @@ moved to Cold on 2 Nov, so Archive waits until 7 days after that. The rule did
 exactly what it said; the form just said more than it showed.
 
 ![Third run: nothing to archive](screenshots/02-49-phone-archive-skipped.png)
+
+**Change made, 4 Nov 22:24 UTC:** the 7-day condition was removed from
+`fast-demo` only, in Code View, so the test files can reach Archive. The
+realistic `tier-by-age` rule keeps it. A rule change can take up to 24 hours to
+apply.
 
 ### 8. Alerts on every tier change
 
@@ -554,7 +559,7 @@ reading its data.*
 
 | Item | Expected | Where it goes |
 |---|---|---|
-| `fast-demo` moving `lc-1` to `lc-3` to Archive | first daily run more than 7 days after 2 Nov 22:26 UTC, about 10 Nov | step 7 table, phone screenshots |
+| `fast-demo` moving `lc-1` to `lc-3` to Archive | the 4 or 5 Nov daily run, after the condition was removed | step 7 table, phone screenshots |
 | Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
 | Real per-tier costs | Cost Management, a few days in | question 1 |
 
