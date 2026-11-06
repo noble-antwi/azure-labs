@@ -9,8 +9,8 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Still running: the
-> early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
+> **Status:** built and tested in the portal. Lifecycle walk complete.
+> Still waiting on the bill: early-deletion charges and per-tier costs. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
 
