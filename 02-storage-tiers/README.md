@@ -9,7 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Still running: the `fast-demo` lifecycle moves (Cool and Cold done; Archive due about 5 Nov) and the
+> **Status:** built and tested in the portal. Still running: the
 > early-deletion charge on the bill. See [Still waiting on](#still-waiting-on).
 
 ## What this lab is
@@ -269,7 +269,7 @@ wins, so `fast-demo` decides.
 | 2 Nov, 22:26 | **Cool to Cold**, all three | `tierToCold` 3 of 3 succeeded |
 | 3 Nov, 22:26 | **nothing moved**, stayed Cold | every count 0: see below |
 | 4 Nov, 22:26 | nothing moved | ran 2 minutes after the rule change, still on the old rule |
-| 5 Nov | *pending: Archive* (condition removed) | |
+| 5 Nov, 22:57 | **Cold to Archive**, all three | `tierToArchive` 3 of 3 succeeded |
 
 The first move arrived on the phone as it happened: three tier-change alerts
 at the same minute, then the run's summary about **30 minutes later**. The
@@ -302,6 +302,11 @@ exactly what it said; the form just said more than it showed.
 `fast-demo` only, in Code View, so the test files can reach Archive. The
 realistic `tier-by-age` rule keeps it. A rule change can take up to 24 hours to
 apply.
+
+The next run archived all three. The whole walk took five daily runs instead
+of three, and the run time is not fixed: 22:26 four nights in a row, then 22:57.
+
+![Final run: Cold to Archive](screenshots/02-50-phone-cold-to-archive.png)
 
 ### 8. Alerts on every tier change
 
@@ -560,7 +565,6 @@ reading its data.*
 
 | Item | Expected | Where it goes |
 |---|---|---|
-| `fast-demo` moving `lc-1` to `lc-3` to Archive | the 4 or 5 Nov daily run, after the condition was removed | step 7 table, phone screenshots |
 | Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
 | Real per-tier costs | Cost Management, a few days in | question 1 |
 
