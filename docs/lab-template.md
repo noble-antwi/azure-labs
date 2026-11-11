@@ -49,6 +49,12 @@ The primary record. Numbered steps covering the decisions, not every click.
 Note anything the portal defaulted to that you had to think about, and why
 you chose what you chose. Screenshots go in screenshots/ and are referenced
 inline where they clarify something.
+
+Every image is a numbered figure, N = lab number:
+  The text that leads into it cites it: "...was refused (Figure N.4)."
+  ![Plain description, used as alt text](screenshots/NN-04-name.png)
+
+  *Figure N.4: Plain description.*
 -->
 
 1.

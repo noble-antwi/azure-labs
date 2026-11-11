@@ -2,7 +2,7 @@
 
 ![Where a file lives, and what it takes to get it back](diagrams/tier-flow.svg)
 
-*Animated. A file walks down the tiers under a lifecycle rule, goes offline in
+*Figure 2.1: Where a file lives, and what it takes to get it back. Animated. A file walks down the tiers under a lifecycle rule, goes offline in
 Archive, is refused a read, and is rehydrated back to Hot; every tier change
 travels through Event Grid and a Logic App to a phone alert. Built by
 [`scripts/diagrams/lab02_tier_flow.py`](../scripts/diagrams/lab02_tier_flow.py).*
@@ -61,9 +61,11 @@ then has to be pulled back in a hurry.
 
 ## Architecture
 
-![Lab 02 architecture](diagrams/architecture.png)
+Figure 2.2 shows every resource in the lab and how they connect.
 
-*Source: [`diagrams/architecture.drawio`](diagrams/architecture.drawio), editable in
+![Lab 02 architecture: storage account, container, lifecycle rules, data access and the alert pipeline](diagrams/architecture.png)
+
+*Figure 2.2: Lab 02 architecture: storage account, container, lifecycle rules, data access and the alert pipeline. Source: [`diagrams/architecture.drawio`](diagrams/architecture.drawio), editable in
 [draw.io](https://app.diagrams.net). Rendered with
 [`scripts/diagrams/render_drawio.py`](../scripts/diagrams/render_drawio.py).*
 
@@ -91,9 +93,11 @@ portal now asks for a **primary service** (Blob Storage) and a **primary
 workload**; **General purpose** was chosen because the workload presets quietly
 change defaults on later tabs. Choosing it also reset the resource group to
 `NetworkWatcherRG`, which had to be put back: re-check earlier fields after
-changing a preset.
+changing a preset (Figure 2.3).
 
-![Basics](screenshots/02-01-basics.png)
+![Create storage account, Basics tab](screenshots/02-01-basics.png)
+
+*Figure 2.3: Create storage account, Basics tab.*
 
 Standard performance, **LRS** redundancy (three copies in one datacentre: the
 cheapest, and it supports archive). The portal recommends RA-GRS for general
@@ -101,9 +105,11 @@ purpose, which copies to a second region; a lab does not need it.
 
 **The default access tier offers Hot, Cool and Cold, but not Archive.** The
 account default applies to every new blob, and an archived blob is offline, so
-it cannot be the default. Archive is set per blob.
+it cannot be the default. Archive is set per blob (Figure 2.4).
 
-![Advanced: no Archive in the default tier](screenshots/02-02-advanced-tiers-no-archive.png)
+![Advanced tab: the default access tier offers Hot, Cool and Cold, but not Archive](screenshots/02-02-advanced-tiers-no-archive.png)
+
+*Figure 2.4: Advanced tab: the default access tier offers Hot, Cool and Cold, but not Archive.*
 
 The other tabs, and why each was left as it was:
 
@@ -116,19 +122,40 @@ The other tabs, and why each was left as it was:
 | Security | Storage account key access **on** | Kept on for now; part 4 turns it off |
 | Encryption | Microsoft-managed keys | Data is always encrypted at rest; this only decides who holds the key |
 
-![Networking](screenshots/02-03-networking.png)
-![Data protection](screenshots/02-04-data-protection.png)
-![Security](screenshots/02-05-security.png)
-![Encryption](screenshots/02-06-encryption.png)
-![Tags](screenshots/02-07-tags.png)
+Figures 2.5 to 2.9 show each of those tabs as submitted.
+
+![Networking tab](screenshots/02-03-networking.png)
+
+*Figure 2.5: Networking tab.*
+
+![Data protection tab](screenshots/02-04-data-protection.png)
+
+*Figure 2.6: Data protection tab.*
+
+![Security tab](screenshots/02-05-security.png)
+
+*Figure 2.7: Security tab.*
+
+![Encryption tab](screenshots/02-06-encryption.png)
+
+*Figure 2.8: Encryption tab.*
+
+![Tags tab: the lab tags](screenshots/02-07-tags.png)
+
+*Figure 2.9: Tags tab: the lab tags.*
 
 The review page shows the six tags applied to the storage account **and** to
 resource types this deployment did not create (virtual network, private
 endpoint): the portal's tag picker defaults to "all resources selected" for
-anything the template could include.
+anything the template could include (Figures 2.10 and 2.11).
 
-![Review: tags per resource type](screenshots/02-08-review-tags.png)
-![Review](screenshots/02-09-review.png)
+![Review: tags applied per resource type](screenshots/02-08-review-tags.png)
+
+*Figure 2.10: Review: tags applied per resource type.*
+
+![Review + create summary](screenshots/02-09-review.png)
+
+*Figure 2.11: Review + create summary.*
 
 ### 2. Create a container
 
@@ -137,14 +164,18 @@ can be granted per container), a boundary for lifecycle and immutability rules,
 and the equivalent of an S3 bucket. Containers do not nest.
 
 `tiers` was created **Private**, and the access level was greyed out because
-anonymous access is off for the whole account.
+anonymous access is off for the whole account (Figure 2.12).
 
-![New container: private, greyed out](screenshots/02-10-new-container-private.png)
+![New container: anonymous access greyed out, so the container is private](screenshots/02-10-new-container-private.png)
+
+*Figure 2.12: New container: anonymous access greyed out, so the container is private.*
 
 A second container, **`$logs`**, appeared without being created. It is a
-system container Azure reserves for storage analytics logs.
+system container Azure reserves for storage analytics logs (Figure 2.13).
 
-![Containers: $logs and tiers](screenshots/02-11-containers-logs-and-tiers.png)
+![Containers: the system container $logs next to tiers](screenshots/02-11-containers-logs-and-tiers.png)
+
+*Figure 2.13: Containers: the system container $logs next to tiers.*
 
 ### 3. Upload one file per tier
 
@@ -157,11 +188,15 @@ the blob has no tier of its own and follows the account default; if that
 default later changed to Cool, the blob would silently change with it. Plain
 **Hot** pins the tier to the blob. **Archive** is offered here, per blob, even
 though the account default cannot be Archive. **Smart** (automatic tiering by
-access pattern) was listed but greyed out.
+access pattern) was listed but greyed out (Figures 2.14 and 2.15).
 
-![Upload: tier options](screenshots/02-12-upload-tier-options.png)
+![Upload: the access tier choices for a blob](screenshots/02-12-upload-tier-options.png)
 
-![Four files, four tiers](screenshots/02-13-four-files-four-tiers.png)
+*Figure 2.14: Upload: the access tier choices for a blob.*
+
+![The container with one file in each tier](screenshots/02-13-four-files-four-tiers.png)
+
+*Figure 2.15: The container with one file in each tier.*
 
 The container page reads **Authentication method: Access key**: the portal was
 using the account's master key behind the scenes, not the signed-in user.
@@ -170,17 +205,29 @@ using the account's master key behind the scenes, not the signed-in user.
 
 Hot, Cool and Cold all opened in the portal editor straight away, with the same
 content. From the reader's side, the online tiers behave identically; only the
-bill differs.
+bill differs (Figures 2.16 to 2.18).
 
-![Cold opens](screenshots/02-16-cold-opens.png)
-![Cool opens](screenshots/02-17-cool-opens.png)
-![Hot opens](screenshots/02-18-hot-opens.png)
+![Report-cold.txt opens straight away](screenshots/02-16-cold-opens.png)
 
-The archived file did not open, and would not download:
+*Figure 2.16: Report-cold.txt opens straight away.*
 
-![Download failed](screenshots/02-14-archive-download-failed.png)
+![Report-cool.txt opens straight away](screenshots/02-17-cool-opens.png)
 
-![This operation is not permitted on an archived blob](screenshots/02-15-archive-not-permitted.png)
+*Figure 2.17: Report-cool.txt opens straight away.*
+
+![Report-hot.txt opens straight away](screenshots/02-18-hot-opens.png)
+
+*Figure 2.18: Report-hot.txt opens straight away.*
+
+The archived file did not open, and would not download (Figures 2.19 and 2.20):
+
+![Downloading the archived file fails](screenshots/02-14-archive-download-failed.png)
+
+*Figure 2.19: Downloading the archived file fails.*
+
+![The portal refuses: not permitted on an archived blob](screenshots/02-15-archive-not-permitted.png)
+
+*Figure 2.20: The portal refuses: not permitted on an archived blob.*
 
 > This operation is not permitted on an archived blob. To view or edit the blob,
 > copy and paste the blob to rehydrate or change the blob's access tier to an
@@ -196,16 +243,23 @@ any online tier directly.
 A second file, `report-archive-standard.txt`, was archived so both speeds could
 run side by side. Each was moved back to **Hot** with **Change tier**, one at
 each **rehydrate priority**. The portal warns: *"Rehydrating a blob from
-Archive to Hot or Cool may take several hours to complete."*
+Archive to Hot or Cool may take several hours to complete."* (Figures 2.21 and 2.22)
 
-![High priority](screenshots/02-19-rehydrate-high.png)
-![Standard priority](screenshots/02-20-rehydrate-standard.png)
+![Rehydrate to Hot, High priority](screenshots/02-19-rehydrate-high.png)
+
+*Figure 2.21: Rehydrate to Hot, High priority.*
+
+![Rehydrate to Hot, Standard priority](screenshots/02-20-rehydrate-standard.png)
+
+*Figure 2.22: Rehydrate to Hot, Standard priority.*
 
 Both started at 19:10 UTC (20 seconds apart) and immediately read
 **Archive (rehydrating to Hot)**: still archive, still unreadable, until the
-copy back online finishes.
+copy back online finishes (Figure 2.23).
 
-![Both rehydrating](screenshots/02-21-both-rehydrating.png)
+![Both archived files showing a pending rehydration](screenshots/02-21-both-rehydrating.png)
+
+*Figure 2.23: Both archived files showing a pending rehydration.*
 
 Prediction: High within an hour, Standard several hours. Both correct: High ≈ 37 minutes, Standard ≈ 3 h 15 min, far inside its 15-hour ceiling.
 
@@ -223,30 +277,39 @@ Moving files by hand does not scale. **Lifecycle management** applies rules
 once a day: `tier-by-age` moves blobs to Cool **30 days** after their last
 modification and to Archive at **180 days**, both counted from the same last
 change (180 is not 30 + 180). Changing tier does not count as a modification;
-editing a file resets the clock.
+editing a file resets the clock (Figure 2.24).
 
-![Rule details](screenshots/02-22-lifecycle-rule-details.png)
+![Lifecycle rule tier-by-age: details](screenshots/02-22-lifecycle-rule-details.png)
 
-*Base blobs* means the current file, as opposed to snapshots or old versions;
+*Figure 2.24: Lifecycle rule tier-by-age: details. Base blobs* means the current file, as opposed to snapshots or old versions;
 real policies often add separate rules to expire old versions, which pile up
 unseen. *Skip blobs rehydrated in the last 7 days* stops a rule from
-re-archiving a file someone has just brought back.
+re-archiving a file someone has just brought back (Figures 2.25 and 2.26).
 
-![30 and 180 days](screenshots/02-23-lifecycle-30-180.png)
-![Prefix filter](screenshots/02-24-lifecycle-prefix.png)
+![Tier-by-age: Cool after 30 days, Archive after 180](screenshots/02-23-lifecycle-30-180.png)
+
+*Figure 2.25: Tier-by-age: Cool after 30 days, Archive after 180.*
+
+![Tier-by-age: prefix filter](screenshots/02-24-lifecycle-prefix.png)
+
+*Figure 2.26: Tier-by-age: prefix filter.*
 
 The prefix `tiers/lc-` limits the rule to files whose names start with `lc-`,
 so the four test files are untouched. A new rule *"can take up to 24 hours to
 go into effect"*, and at 30 days it would never fire within a one-day lab: the
-rule can be seen, not watched.
+rule can be seen, not watched (Figure 2.27).
 
-![Rule enabled](screenshots/02-25-lifecycle-rule-enabled.png)
+![Tier-by-age enabled](screenshots/02-25-lifecycle-rule-enabled.png)
+
+*Figure 2.27: Tier-by-age enabled.*
 
 **Code View** shows the same rule as JSON (`tierToCool`,
 `daysAfterModificationGreaterThan: 30`, `daysAfterLastTierChangeGreaterThan: 7`,
-`prefixMatch`): every click became a line of text that could live in Git.
+`prefixMatch`): every click became a line of text that could live in Git (Figure 2.28).
 
-![The rule as JSON](screenshots/02-26-lifecycle-code-view.png)
+![Tier-by-age in Code View (JSON)](screenshots/02-26-lifecycle-code-view.png)
+
+*Figure 2.28: Tier-by-age in Code View (JSON).*
 
 ### 7. A fast rule to watch over a few days
 
@@ -254,10 +317,15 @@ To see a rule actually act, a second rule, `fast-demo`, uses the shortest
 practical gaps: Cool after **1** day, Cold after **2**, Archive after **3**,
 on three new files `lc-1.txt` to `lc-3.txt` uploaded Hot. Days are the
 smallest unit lifecycle rules accept, and rules run once a day, so this plays
-out over about four days.
+out over about four days (Figures 2.29 and 2.30).
 
-![fast-demo: 1, 2, 3 days](screenshots/02-27-fast-demo-1-2-3.png)
-![fast-demo prefix](screenshots/02-28-fast-demo-prefix.png)
+![Fast-demo: Cool after 1 day, Cold after 2, Archive after 3](screenshots/02-27-fast-demo-1-2-3.png)
+
+*Figure 2.29: Fast-demo: Cool after 1 day, Cold after 2, Archive after 3.*
+
+![Fast-demo: prefix filter](screenshots/02-28-fast-demo-prefix.png)
+
+*Figure 2.30: Fast-demo: prefix filter.*
 
 Both rules match the `lc-` files. Where rules overlap, the cheapest action
 wins, so `fast-demo` decides.
@@ -275,10 +343,15 @@ The first move arrived on the phone as it happened: three tier-change alerts
 at the same minute, then the run's summary about **30 minutes later**. The
 alerts show the lifecycle engine changing tiers through the same
 `SetBlobTier` operation a person uses in the portal; only the timing is
-automated.
+automated (Figures 2.31 and 2.32).
 
-![First lifecycle moves, as phone alerts](screenshots/02-47-phone-first-lifecycle-moves.png)
-![Second run: Cool to Cold](screenshots/02-48-phone-cool-to-cold.png)
+![Phone alerts, 1 Nov run: Hot to Cool](screenshots/02-47-phone-first-lifecycle-moves.png)
+
+*Figure 2.31: Phone alerts, 1 Nov run: Hot to Cool.*
+
+![Phone alerts, 2 Nov run: Cool to Cold](screenshots/02-48-phone-cool-to-cold.png)
+
+*Figure 2.32: Phone alerts, 2 Nov run: Cool to Cold.*
 
 **Why Archive did not happen on day 3.** The rule's JSON shows the portal had
 added a second condition to the Archive action:
@@ -294,9 +367,11 @@ That is the portal's *skip blobs rehydrated in the last 7 days* option, on by
 default. It exists so a file someone just pulled back out of Archive is not
 archived again the next night. But it counts **any** tier change, and the files
 moved to Cold on 2 Nov, so Archive waits until 7 days after that. The rule did
-exactly what it said; the form just said more than it showed.
+exactly what it said; the form just said more than it showed (Figure 2.33).
 
-![Third run: nothing to archive](screenshots/02-49-phone-archive-skipped.png)
+![Phone alert, 3 Nov run: nothing moved](screenshots/02-49-phone-archive-skipped.png)
+
+*Figure 2.33: Phone alert, 3 Nov run: nothing moved.*
 
 **Change made, 4 Nov 22:24 UTC:** the 7-day condition was removed from
 `fast-demo` only, in Code View, so the test files can reach Archive. The
@@ -304,9 +379,11 @@ realistic `tier-by-age` rule keeps it. A rule change can take up to 24 hours to
 apply.
 
 The next run archived all three. The whole walk took five daily runs instead
-of three, and the run time is not fixed: 22:26 four nights in a row, then 22:57.
+of three, and the run time is not fixed: 22:26 four nights in a row, then 22:57 (Figure 2.34).
 
-![Final run: Cold to Archive](screenshots/02-50-phone-cold-to-archive.png)
+![Phone alerts, 5 Nov run: Cold to Archive](screenshots/02-50-phone-cold-to-archive.png)
+
+*Figure 2.34: Phone alerts, 5 Nov run: Cold to Archive.*
 
 ### 8. Alerts on every tier change
 
@@ -329,11 +406,19 @@ storage account ──event──► Event Grid ──► Logic App ──HTTP P
   this repository.
 
 Email was the first idea, but a Logic App cannot send mail through a personal
-Gmail account, so a push service was used instead.
+Gmail account, so a push service was used instead (Figures 2.35 to 2.37).
 
-![Logic App hosting plans](screenshots/02-29-logic-app-plans.png)
-![Logic App basics](screenshots/02-30-logic-app-basics.png)
-![Trigger with both event types](screenshots/02-31-trigger-event-types.png)
+![Logic App hosting plans: Consumption chosen](screenshots/02-29-logic-app-plans.png)
+
+*Figure 2.35: Logic App hosting plans: Consumption chosen.*
+
+![Logic App la-tier-alerts, Basics](screenshots/02-30-logic-app-basics.png)
+
+*Figure 2.36: Logic App la-tier-alerts, Basics.*
+
+![Event Grid trigger with both event types](screenshots/02-31-trigger-event-types.png)
+
+*Figure 2.37: Event Grid trigger with both event types.*
 
 The trigger's connection uses **OAuth**, so it acts as the signed-in Owner. A
 production version would use a managed identity with only the rights it needs,
@@ -341,9 +426,11 @@ the same least-privilege point as lab 01's Tag Contributor finding.
 
 The action is the built-in **HTTP** step. Its body must be inserted as an
 **expression** (an *fx* chip); pasted as plain text it would send the formula's
-own words.
+own words (Figure 2.38).
 
-![HTTP action with the body expression](screenshots/02-32-http-body-expression.png)
+![HTTP action posting to ntfy, with the body expression](screenshots/02-32-http-body-expression.png)
+
+*Figure 2.38: HTTP action posting to ntfy, with the body expression.*
 
 **Gotcha: the trigger failed silently.** After publishing, no event
 subscription existed and the trigger's history read *Failed*. The cause was
@@ -351,9 +438,11 @@ the subscription itself: the **`Microsoft.EventGrid` resource provider was
 not registered** on `sub-noble-seclab-001`. Every Azure service is a resource
 provider that has to be switched on per subscription; common ones are
 registered automatically, Event Grid was not. Registering it and publishing
-again created the subscription.
+again created the subscription (Figure 2.39).
 
-![Registering Microsoft.EventGrid](screenshots/02-33-eventgrid-provider.png)
+![Registering the Microsoft.EventGrid resource provider](screenshots/02-33-eventgrid-provider.png)
+
+*Figure 2.39: Registering the Microsoft.EventGrid resource provider.*
 
 ```
 az provider show -n Microsoft.EventGrid --query registrationState   →  Registered
@@ -362,13 +451,17 @@ event subscription                                                   →  WebHoo
 ```
 
 **Test.** `report-hot.txt` was moved Hot → Cool by hand. The Logic App ran one
-second later and ntfy received the message. The test push arrived first:
+second later and ntfy received the message. The test push arrived first (Figure 2.40):
 
-![Test push](screenshots/02-35-phone-test-push.png)
+![Test push from ntfy](screenshots/02-35-phone-test-push.png)
 
-The first real alert carried the raw event type and path:
+*Figure 2.40: Test push from ntfy.*
 
-![First alert](screenshots/02-36-phone-first-alert.png)
+The first real alert carried the raw event type and path (Figure 2.41):
+
+![First tier-change alert on the phone](screenshots/02-36-phone-first-alert.png)
+
+*Figure 2.41: First tier-change alert on the phone.*
 
 The event's own payload carries `previousTier`, `accessTier` and the `api`
 that made the change, so the body became a conditional expression:
@@ -382,31 +475,39 @@ if(equals(triggerBody()?['eventType'],'Microsoft.Storage.BlobTierChanged'),
 ```
 
 Moving the file back to Hot produced *report-hot.txt: Cool -> Hot (by
-SetBlobTier)*:
+SetBlobTier)* (Figure 2.42):
 
-![Formatted alert](screenshots/02-37-phone-formatted-alert.png)
+![The alert after formatting](screenshots/02-37-phone-formatted-alert.png)
+
+*Figure 2.42: The alert after formatting.*
 
 That move back also took a blob out of Cool minutes after it went in, well
 inside Cool's 30-day minimum: an early-deletion charge to look for on the bill
-(question 3).
+(question 3) (Figure 2.43).
 
-![lc files uploaded; report-archive.txt back online](screenshots/02-34-lc-files-and-archive-online.png)
+![Lc files uploaded; report-archive.txt back online](screenshots/02-34-lc-files-and-archive-online.png)
+
+*Figure 2.43: Lc files uploaded; report-archive.txt back online.*
 
 ### 9. Switch off the master keys
 
 Until now the portal read files with the account's **access key**, a master
 password for the whole account. **Configuration > Allow storage account key
 access: Disabled.** The portal warns that every Shared Key request, including
-SAS tokens signed with the key, will now be refused.
+SAS tokens signed with the key, will now be refused (Figure 2.44).
 
-![Key access disabled](screenshots/02-38-key-access-disabled.png)
+![Storage account key access disabled](screenshots/02-38-key-access-disabled.png)
 
-The container stopped listing anything, for the subscription **Owner**:
+*Figure 2.44: Storage account key access disabled.*
+
+The container stopped listing anything, for the subscription **Owner** (Figure 2.45):
 
 > You do not have permissions to list the data using your user account with
 > Microsoft Entra ID.
 
-![Owner cannot read the data](screenshots/02-39-owner-cannot-read-data.png)
+![With keys off, the subscription Owner cannot list the files](screenshots/02-39-owner-cannot-read-data.png)
+
+*Figure 2.45: With keys off, the subscription Owner cannot list the files.*
 
 Azure keeps two kinds of rights apart:
 
@@ -422,27 +523,35 @@ Owner is all control plane. The key had been hiding the missing data role.
 **Storage Blob Data Reader**, assigned on the **`tiers` container** (not the
 account), to the one user, with an audit-style description: purpose, scope,
 why Reader and not Contributor, approver, review date, change reference. No ABAC
-condition; the container scope was narrow enough.
+condition; the container scope was narrow enough (Figure 2.46).
 
 ![Assigning Storage Blob Data Reader](screenshots/02-40-assign-blob-data-reader.png)
 
+*Figure 2.46: Assigning Storage Blob Data Reader.*
+
 The user's access on the container now shows the difference between inherited
-and direct rights:
+and direct rights (Figure 2.47):
 
 ![Owner inherited, Reader direct](screenshots/02-41-my-access-inherited-vs-direct.png)
+
+*Figure 2.47: Owner inherited, Reader direct.*
 
 The first read, seconds after assigning, still failed: role assignments take a
 few minutes to reach the storage service. A few minutes later, with the
 container switched to **Microsoft Entra user account** authentication, all
-eight files listed and opened.
+eight files listed and opened (Figure 2.48).
 
 ![Entra authentication lists the files](screenshots/02-42-entra-auth-lists-files.png)
 
+*Figure 2.48: Entra authentication lists the files.*
+
 Upload was refused, as it should be: *"This request is not authorized to
 perform this operation using this permission."* Reader reads; it cannot
-upload, delete, overwrite or even change a blob's tier.
+upload, delete, overwrite or even change a blob's tier (Figure 2.49).
 
 ![Reader cannot upload](screenshots/02-43-reader-cannot-upload.png)
+
+*Figure 2.49: Reader cannot upload.*
 
 The command-line status checks used for step 5 had been reading with the key
 too; they were switched to the same identity (`--auth-mode login`) and worked
@@ -463,29 +572,35 @@ it, with no Azure account at all.
 **Generate SAS** on `report-hot.txt`: signing method **User delegation key**
 (Account key was greyed out, with the warning that Shared Key requests would be
 denied), permission **Read**, valid for **one hour**, **HTTPS only**, no IP
-restriction, user-bound off.
+restriction, user-bound off (Figure 2.50).
 
 ![User delegation SAS](screenshots/02-44-sas-user-delegation.png)
+
+*Figure 2.50: User delegation SAS.*
 
 A SAS can never grant more than its signer holds. The signer here has
 Storage Blob Data Reader, so a link signed by this user cannot write whatever
 boxes are ticked.
 
 Pasted into a private browser window with no sign-in, the URL returned the
-file:
+file (Figure 2.51):
 
 ![The SAS opens with no sign-in](screenshots/02-45-sas-opens-incognito.png)
+
+*Figure 2.51: The SAS opens with no sign-in.*
 
 The URL's query string carries the slip in plain view: `sp=r` (read),
 `st` and `se` (start and expiry, UTC), `skoid` (the signer's object ID), and
 `sig`, a signature computed over all of it. Changing **one character** of `sig`
-was refused:
+was refused (Figure 2.52):
 
 ```
 AuthenticationFailed: Signature did not match.
 ```
 
 ![A tampered SAS is refused](screenshots/02-46-sas-tampered-refused.png)
+
+*Figure 2.52: A tampered SAS is refused.*
 
 So a holder cannot widen `sp=r` to write or push `se` later; the only lever is
 the expiry, and the link dies on its own. The flip side: until it expires,

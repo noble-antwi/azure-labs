@@ -2,7 +2,7 @@
 
 ![How Azure Policy judged three requests](diagrams/policy-flow.svg)
 
-*Three real requests from this lab, run through four policies in the order
+*Figure 1.1: How Azure Policy judged three requests. Three real requests from this lab, run through four policies in the order
 Azure evaluates them: Modify first, then every Deny. One is created, two are
 refused. Built by [`scripts/diagrams/lab01_policy_flow.py`](../scripts/diagrams/lab01_policy_flow.py);
 video versions: [landscape](diagrams/policy-flow.mp4) ·
@@ -89,7 +89,11 @@ removes its access to everything in the directory.
 
 ## Architecture
 
-![Architecture](diagrams/architecture.png)
+Figure 1.2 shows every resource in the lab and how they connect.
+
+![Lab 01 architecture: subscription, resource group, the four policy assignments and the lock](diagrams/architecture.png)
+
+*Figure 1.2: Lab 01 architecture: subscription, resource group, the four policy assignments and the lock.*
 
 This lab has no network traffic to draw. What matters is **scope**: where each
 rule is attached and what it reaches. So, unlike the other labs, the diagram
@@ -151,11 +155,15 @@ identity a role on the resource group. Granting roles needs `Owner` or
 lab but would fail at that one step.
 
 **Subscriptions > (subscription) > Access control (IAM) > View my access**
-showed `Owner` on both lab subscriptions.
+showed `Owner` on both lab subscriptions (Figures 1.3 and 1.4).
 
 ![Owner on both lab subscriptions](screenshots/01-00-subscriptions.png)
 
+*Figure 1.3: Owner on both lab subscriptions.*
+
 ![View my access showing Owner](screenshots/01-00-my-access.png)
+
+*Figure 1.4: View my access showing Owner.*
 
 The access panel lists `Owner` twice at "This resource". Two separate
 assignments of the same role are harmless: permissions add up, they do not
@@ -166,9 +174,11 @@ cleanup.
 
 `rg-lab-governance-tagging` in **East US**, in `sub-noble-seclab-001`, with six
 tags. Two of them do real work later: `costCenter` is the value P1 copies down
-to resources, and `owner` is the tag P3 demands.
+to resources, and `owner` is the tag P3 demands (Figure 1.5).
 
 ![The resource group's six tags](screenshots/01-01-rg-tags.png)
+
+*Figure 1.5: The resource group's six tags.*
 
 The Tags page states two rules worth remembering. **Tag names are not case
 sensitive; tag values are.** `Owner` and `owner` are the same tag, but
@@ -183,9 +193,11 @@ space `10.0.0.0/16` and one subnet `default` at `10.0.0.0/24`. Everything on
 the **Security** tab stays off: Bastion, Azure Firewall and DDoS Network
 Protection all bill whether or not anything uses them, and DDoS Network
 Protection runs to thousands of dollars a month. The **Tags** tab is left
-empty on purpose.
+empty on purpose (Figure 1.6).
 
-![vnet-before with no tags](screenshots/01-02-vnet-before-no-tags.png)
+![Vnet-before with no tags](screenshots/01-02-vnet-before-no-tags.png)
+
+*Figure 1.6: Vnet-before with no tags.*
 
 **Tags: Add tags.** The network sits inside a group carrying six tags and has
 none of them. Prediction 1 held: a resource group's tags describe the group
@@ -199,9 +211,11 @@ subscription already carried an initiative called **ASC Default**: Microsoft
 Defender for Cloud assigns its default security benchmark to every
 subscription automatically. Its effects only audit (report), so it never
 blocks a request, and it is the source of the non-compliant count on the
-Policy overview before any lab rule existed.
+Policy overview before any lab rule existed (Figure 1.7).
 
 ![Two initiatives already assigned by Defender for Cloud](screenshots/01-03-existing-assignments.png)
+
+*Figure 1.7: Two initiatives already assigned by Defender for Cloud.*
 
 An **initiative** is a bundle of policy definitions assigned as one. This lab
 assigns single policies instead, so each rule's effect can be watched on its
@@ -215,22 +229,28 @@ panel any other way leaves the field blank.
 
 Scope `sub-noble-seclab-001/rg-lab-governance-tagging`, definition **Inherit a
 tag from the resource group if missing**, version `1.*.*` (take minor
-updates automatically, never a new major version), Tag Name `costCenter`.
+updates automatically, never a new major version), Tag Name `costCenter` (Figure 1.8).
 
-![P1 parameters](screenshots/01-04-p1-parameters.png)
+![P1 (inherit costCenter) parameters](screenshots/01-04-p1-parameters.png)
+
+*Figure 1.8: P1 (inherit costCenter) parameters.*
 
 The **Remediation** tab says it plainly: by default an assignment only takes
 effect on newly created resources, and existing ones are updated through a
 remediation task. The task is left off here on purpose, so the old network
-shows up as non-compliant first.
+shows up as non-compliant first (Figure 1.9).
 
 ![Remediation task left off](screenshots/01-05-p1-remediation-off.png)
 
+*Figure 1.9: Remediation task left off.*
+
 The **Managed identity** tab creates a system-assigned identity in East US
 and grants it **Contributor** on the resource group, because that is the role
-the built-in definition asks for.
+the built-in definition asks for (Figure 1.10).
 
 ![P1's managed identity gets Contributor](screenshots/01-06-p1-managed-identity.png)
+
+*Figure 1.10: P1's managed identity gets Contributor.*
 
 A managed identity is an identity for a thing rather than a person. Nothing in
 Azure changes a resource unless some identity with permission makes the
@@ -243,17 +263,23 @@ standalone identity that several things can share.
 **Tag Contributor** role covers exactly that. Contributor can create, change
 and delete anything in the group. The scope is one resource group, so the
 exposure is small, but it is the over-permissioned non-human identity an
-access review exists to catch.
+access review exists to catch (Figure 1.11).
 
 ![Review before create](screenshots/01-07-p1-review.png)
 
+*Figure 1.11: Review before create.*
+
 **Result.** Within minutes, **Policy > Compliance** listed `P1 inherit
 costCenter` as non-compliant, and drilling in showed exactly one resource:
-`vnet-before`. The network was not changed and not deleted. It was reported.
+`vnet-before`. The network was not changed and not deleted. It was reported (Figures 1.12 and 1.13).
 
 ![Compliance overview with P1](screenshots/01-08-compliance-overview.png)
 
-![vnet-before flagged by P1](screenshots/01-09-p1-vnet-before-noncompliant.png)
+*Figure 1.12: Compliance overview with P1.*
+
+![Vnet-before flagged by P1](screenshots/01-09-p1-vnet-before-noncompliant.png)
+
+*Figure 1.13: Vnet-before flagged by P1.*
 
 The P1 page itself still read *Not started* and *100%* while its own list
 already showed `vnet-before` evaluated as non-compliant. The summary tiles
@@ -269,16 +295,22 @@ time, so P1 got its own test before P2 existed.
 
 `vnet-p1-test`, address space `10.1.0.0/16` with subnet `default`
 `10.1.0.0/24` (kept apart from `vnet-before` so the two could later be peered
-without overlap), and **no tags** entered.
+without overlap), and **no tags** entered (Figures 1.14 and 1.15).
 
-![vnet-p1-test address space](screenshots/01-10-p1-test-address-space.png)
+![Vnet-p1-test address space](screenshots/01-10-p1-test-address-space.png)
+
+*Figure 1.14: Vnet-p1-test address space.*
 
 ![Tags tab left empty](screenshots/01-11-p1-test-no-tags.png)
 
-Once created, its Tags page showed `costCenter : it-lab`. Nobody typed it. P1
-rewrote the create request on the way in, before the network existed.
+*Figure 1.15: Tags tab left empty.*
 
-![costCenter added by P1](screenshots/01-12-p1-test-costcenter-added.png)
+Once created, its Tags page showed `costCenter : it-lab`. Nobody typed it. P1
+rewrote the create request on the way in, before the network existed (Figure 1.16).
+
+![CostCenter added by P1](screenshots/01-12-p1-test-costcenter-added.png)
+
+*Figure 1.16: CostCenter added by P1.*
 
 It carries **only** `costCenter`. The group's other five tags did not come
 with it, because P1 was assigned for one tag name. Inheriting five tags would
@@ -294,9 +326,11 @@ it is created.
 
 Searching the definition picker for `Require` returns hundreds of rules,
 because the search also matches descriptions. Filtering **Category** to
-**Tags** cuts it to four:
+**Tags** cuts it to four (Figure 1.17):
 
 ![The four Require-a-tag built-ins](screenshots/01-13-p2-definition-tags-filter.png)
+
+*Figure 1.17: The four Require-a-tag built-ins.*
 
 | Built-in | Checks | Applies to |
 |---|---|---|
@@ -308,22 +342,28 @@ because the search also matches descriptions. Filtering **Category** to
 P2 is the first one: `costCenter` must be present, whatever its value. The
 "and its value" variant would also block a network in a different cost centre.
 The resource-group variants exist because the resource rules do not evaluate
-resource groups at all.
+resource groups at all (Figure 1.18).
 
 ![P2 basics with name and description](screenshots/01-14-p2-basics.png)
 
+*Figure 1.18: P2 basics with name and description.*
+
 The **Description** is for admins reading the assignment later: what it does,
 why, what it works with, who owns it. The **non-compliance message** is for
-whoever gets blocked, so it says what is wrong and how to fix it.
+whoever gets blocked, so it says what is wrong and how to fix it (Figure 1.19).
 
 ![P2 cannot remediate](screenshots/01-15-p2-no-remediation.png)
+
+*Figure 1.19: P2 cannot remediate.*
 
 **"This policy does not support remediation tasks."** Only effects that know
 the fix can go back and apply it: `Modify` (P1) and `DeployIfNotExists`.
 `Deny` only refuses requests, and `Audit` only reports. P2 can block a network
-with no `costCenter` but has no idea what value it should have.
+with no `costCenter` but has no idea what value it should have (Figure 1.20).
 
 ![P2's managed identity tab](screenshots/01-16-p2-managed-identity.png)
+
+*Figure 1.20: P2's managed identity tab.*
 
 **Finding: an identity nobody needed.** The **Managed identity** tab was left
 ticked, so P2 was created with a system-assigned identity even though the
@@ -331,13 +371,19 @@ portal itself warns that the policy "does not contain any role definitions".
 The identity has no permissions and does nothing. It is still a non-human
 identity sitting in the directory with no purpose, and identity sprawl of
 exactly this kind is what access reviews have to clean up. It is removed
-during the code stage with `az policy assignment identity remove`.
+during the code stage with `az policy assignment identity remove` (Figures 1.21 to 1.23).
 
 ![P2 non-compliance message](screenshots/01-17-p2-noncompliance-message.png)
 
-![P2 review](screenshots/01-18-p2-review.png)
+*Figure 1.21: P2 non-compliance message.*
+
+![P2 review before create](screenshots/01-18-p2-review.png)
+
+*Figure 1.22: P2 review before create.*
 
 ![P1 and P2 assigned to the group](screenshots/01-19-assignments-p1-p2.png)
+
+*Figure 1.23: P1 and P2 assigned to the group.*
 
 #### The order Azure evaluates effects in
 
@@ -359,15 +405,21 @@ another assignment; only an **exemption** lets a resource past it.
 #### Test A: P1 and P2 both on, no tags
 
 Run at 10:15 PM, 38 minutes after P2 was assigned, so P2 had had time to take
-effect. `vnet-p2-test`, address space `10.2.0.0/16`, Tags tab left empty.
+effect. `vnet-p2-test`, address space `10.2.0.0/16`, Tags tab left empty (Figure 1.24).
 
-![No tags entered](screenshots/01-20-p2-test-no-tags.png)
+![Tags tab left empty for the test network](screenshots/01-20-p2-test-no-tags.png)
 
-**Validation passed.** P2 did not object.
+*Figure 1.24: Tags tab left empty for the test network.*
 
-![Validation passed](screenshots/01-21-p2-test-validation-passed.png)
+**Validation passed.** P2 did not object (Figures 1.25 and 1.26).
 
-![costCenter added by P1](screenshots/01-22-p2-test-costcenter-added.png)
+![Portal validation passed](screenshots/01-21-p2-test-validation-passed.png)
+
+*Figure 1.25: Portal validation passed.*
+
+![CostCenter added by P1](screenshots/01-22-p2-test-costcenter-added.png)
+
+*Figure 1.26: CostCenter added by P1.*
 
 The network was created carrying `costCenter : it-lab`. P1 added the tag
 first, so by the time P2 checked the request the tag was already there.
@@ -380,9 +432,11 @@ Modify is missing, disabled, or excluded.
 
 By then the compliance view had caught up with `vnet-p1-test`: P1 and P2 each
 showed **1 of 2** resources compliant. The non-compliant one in both is
-`vnet-before`.
+`vnet-before` (Figure 1.27).
 
 ![P1 and P2 at 50%](screenshots/01-23-compliance-p1-p2-half.png)
+
+*Figure 1.27: P1 and P2 at 50%.*
 
 The overall tile stays at **0 out of 4** because a resource counts as compliant
 only if it passes *every* assigned policy, and the ASC Default initiative
@@ -393,29 +447,39 @@ still flags all of them.
 Test A passing had two possible explanations: P1 rescued the request, or P2
 was not live yet. To rule out the second, P1's **Policy enforcement** was set
 to **Do not enforce** at 10:35 PM. That mode keeps evaluating and reporting
-compliance but stops the effect from acting.
+compliance but stops the effect from acting (Figure 1.28).
 
 ![P1 set to Do not enforce](screenshots/01-24-p1-do-not-enforce.png)
 
+*Figure 1.28: P1 set to Do not enforce.*
+
 At 10:48 PM, `vnet-p2-control` (`10.3.0.0/16`, no tags) was tried. The portal's
-own **Review + create** check said *Validation passed*:
+own **Review + create** check said *Validation passed* (Figure 1.29):
 
 ![Portal validation passed](screenshots/01-25-control-validation-passed.png)
 
+*Figure 1.29: Portal validation passed.*
+
 Then **Create** failed: *"The template deployment failed because of policy
 violation."* The portal's form check does not run Azure Policy; the policy
-check happens when the request reaches Azure Resource Manager.
+check happens when the request reaches Azure Resource Manager (Figure 1.30).
 
 ![Deployment failed on policy](screenshots/01-26-control-deployment-failed.png)
+
+*Figure 1.30: Deployment failed on policy.*
 
 At 10:52 PM P1 went back to **Default (enforcement)**. The same network,
 still with no tags, was created at 10:53 carrying `costCenter : it-lab`.
 Turning the effect back on took effect within a minute; the 30-minute figure
-is a worst case, not a fixed delay.
+is a worst case, not a fixed delay (Figures 1.31 and 1.32).
 
 ![P1 back on](screenshots/01-27-p1-enforcement-back-on.png)
 
-![vnet-p2-control created once P1 was back](screenshots/01-28-control-created-costcenter.png)
+*Figure 1.31: P1 back on.*
+
+![Vnet-p2-control created once P1 was back](screenshots/01-28-control-created-costcenter.png)
+
+*Figure 1.32: Vnet-p2-control created once P1 was back.*
 
 Together, Tests A and B answer question 3: P2 is live and does block, and the
 only thing that got the untagged network past it was P1 adding the tag first.
@@ -433,22 +497,30 @@ tag with an **allowed values** list instead of inheriting a single value.
 Same built-in as P2, **Require a tag on resources**, with Tag Name `owner`.
 The Tags category holds many more built-ins than the four "Require" ones:
 add, append, inherit, and add-or-replace variants for resources, resource
-groups and subscriptions.
+groups and subscriptions (Figure 1.33).
 
 ![All built-ins in the Tags category](screenshots/01-29-tags-category-builtins.png)
 
+*Figure 1.33: All built-ins in the Tags category.*
+
 This time the **Create a Managed Identity** box was unticked, so P3 has no
-identity, which is right for a Deny.
+identity, which is right for a Deny (Figures 1.34 and 1.35).
 
 ![P3 non-compliance message](screenshots/01-30-p3-noncompliance-message.png)
 
+*Figure 1.34: P3 non-compliance message.*
+
 ![P3 review: no managed identity](screenshots/01-31-p3-review-no-identity.png)
+
+*Figure 1.35: P3 review: no managed identity.*
 
 P1 and P3 look at **different tags**. P1 can only ever supply `costCenter`, so
 nothing rescues a request that lacks `owner`: P3 is a plain Deny with no
-Modify in front of it.
+Modify in front of it (Figure 1.36).
 
 ![Compliance with P3 just assigned](screenshots/01-32-compliance-with-p3.png)
+
+*Figure 1.36: Compliance with P3 just assigned.*
 
 Straight after assignment P3 read *Not started*, *100% (0 out of 0)*: it had
 not been evaluated against anything yet.
@@ -458,13 +530,17 @@ not been evaluated against anything yet.
 **The Tags tab warns before you submit.** While creating `vnet-p3-noowner`,
 the portal's Tags tab showed P2's non-compliance message inline, with a
 **Click here to set required tags** link. The portal reads the Deny policies on
-the target scope and surfaces their messages in the form.
+the target scope and surfaces their messages in the form (Figure 1.37).
 
 ![Tags tab shows the policy message](screenshots/01-33-tags-tab-policy-warning.png)
 
-It still showed the costCenter warning with `owner=noble` entered:
+*Figure 1.37: Tags tab shows the policy message.*
+
+It still showed the costCenter warning with `owner=noble` entered (Figure 1.38):
 
 ![Warning stays with owner entered](screenshots/01-34-tags-tab-warning-with-owner.png)
+
+*Figure 1.38: Warning stays with owner entered.*
 
 That warning is only advice. The form checks the Deny rule on its own and does
 not know that P1 will add `costCenter` on the way in, so it warns about a tag
@@ -475,17 +551,21 @@ Resource Manager, applies the effects in order.
 and the portal's **Click here to view details** opened an empty *Errors* panel:
 the request was refused at validation, before any deployment existed to hold an
 error. The detail is in the resource group's **Activity log**. Under the failed
-**Validate Deployment** entry sit two child events, in this order:
+**Validate Deployment** entry sit two child events, in this order (Figure 1.39):
 
 - **Modify**: Succeeded (P1 added `costCenter`)
 - **'deny' Policy action**: Failed (P3 refused the request)
 
 ![Activity log: Modify, then deny](screenshots/01-35-activity-log-modify-then-deny.png)
 
+*Figure 1.39: Activity log: Modify, then deny.*
+
 That is the evaluation order from the docs, recorded in the audit trail. The
-entry's JSON carries the error code and the custom message:
+entry's JSON carries the error code and the custom message (Figure 1.40):
 
 ![RequestDisallowedByPolicy with the P3 message](screenshots/01-36-activity-log-deny-json.png)
+
+*Figure 1.40: RequestDisallowedByPolicy with the P3 message.*
 
 ```
 "code": "RequestDisallowedByPolicy",
@@ -500,20 +580,26 @@ fails on policy.
 
 **`vnet-p3-ok`** (`10.5.0.0/16`, only `owner=noble` entered) was created and
 ended up with **two** tags: the `owner` it was given and the `costCenter` P1
-added. Every rule was satisfied, so nothing blocked it.
+added. Every rule was satisfied, so nothing blocked it (Figures 1.41 and 1.42).
 
-![vnet-p3-ok with only owner entered](screenshots/01-37-p3-ok-owner-tag-entered.png)
+![Vnet-p3-ok with only owner entered](screenshots/01-37-p3-ok-owner-tag-entered.png)
 
-![vnet-p3-ok ends up with owner and costCenter](screenshots/01-38-p3-ok-two-tags.png)
+*Figure 1.41: Vnet-p3-ok with only owner entered.*
+
+![Vnet-p3-ok ends up with owner and costCenter](screenshots/01-38-p3-ok-two-tags.png)
+
+*Figure 1.42: Vnet-p3-ok ends up with owner and costCenter.*
 
 #### P4: allowed locations (Deny), at subscription scope
 
 Searching definitions for `Allowed locations` shows the general rule beside
 service-specific ones (Cosmos DB, SQL, IoT Hub, API Management) and a separate
 **Allowed locations for resource groups**. The general rule checks resources
-only; resource groups need the second one.
+only; resource groups need the second one (Figure 1.43).
 
 ![Allowed locations and its variants](screenshots/01-39-p4-allowed-locations-variants.png)
+
+*Figure 1.43: Allowed locations and its variants.*
 
 **Scope decision.** P1 to P3 sit on the resource group. P4 was deliberately
 assigned to the **whole subscription** `sub-noble-seclab-001`, leaving the
@@ -523,9 +609,11 @@ tenant-wide guardrail. Consequences accepted with it:
 - New resources anywhere in the subscription outside East US are refused.
 - Existing resources elsewhere are reported, not removed.
 - A later lab that needs a second region must add it to P4, or exclude its
-  resource group, first.
+  resource group, first (Figure 1.44).
 
 ![P4 basics at subscription scope](screenshots/01-40-p4-basics-subscription-scope.png)
+
+*Figure 1.44: P4 basics at subscription scope.*
 
 **Policy enforcement** has three modes:
 
@@ -539,36 +627,48 @@ Enroll was greyed out for P1 to P3 but offered for P4.
 
 Allowed locations set to **East US** only, no managed identity, and a message
 written for subscription scope that tells the reader who can approve an
-exception:
+exception (Figures 1.45 and 1.46):
 
 ![P4 parameters](screenshots/01-41-p4-parameters-eastus.png)
 
-![P4 review](screenshots/01-42-p4-review.png)
+*Figure 1.45: P4 parameters.*
+
+![P4 review before create](screenshots/01-42-p4-review.png)
+
+*Figure 1.46: P4 review before create.*
 
 With all four rules in place, P4 read **Compliant, 6 of 6**: every existing
 resource in the subscription was already in East US. P1 and P2 read 4 of 5
 (only `vnet-before` lacks `costCenter`), and P3 1 of 5 (only `vnet-p3-ok`
 carries `owner`; the earlier networks predate the rule and were never given
-one).
+one) (Figure 1.47).
 
 ![Compliance with all four rules](screenshots/01-43-compliance-all-four.png)
+
+*Figure 1.47: Compliance with all four rules.*
 
 #### Testing P4
 
 `vnet-westus`: **West US**, `10.6.0.0/16`, tag `owner=noble` so that P3 had
-nothing to object to, leaving location as the only thing that could fail.
+nothing to object to, leaving location as the only thing that could fail (Figures 1.48 and 1.49).
 
-![vnet-westus in West US](screenshots/01-44-p4-test-westus.png)
+![Vnet-westus in West US](screenshots/01-44-p4-test-westus.png)
 
-![Deployment failed](screenshots/01-45-p4-test-deployment-failed.png)
+*Figure 1.48: Vnet-westus in West US.*
+
+![Vnet-westus refused: West US is not an allowed location](screenshots/01-45-p4-test-deployment-failed.png)
+
+*Figure 1.49: Vnet-westus refused: West US is not an allowed location.*
 
 Because P4 sits on the subscription, its trail is in the **subscription's**
 Activity log, not only the resource group's. Under the failed **Validate
 Deployment**: **Modify** succeeded (P1 still added `costCenter`), then the
 **'deny' Policy action** failed. The JSON names the target and carries the P4
-message:
+message (Figure 1.50):
 
 ![P4 deny in the subscription Activity log](screenshots/01-46-p4-activity-log-json.png)
+
+*Figure 1.50: P4 deny in the subscription Activity log.*
 
 ```
 "code": "RequestDisallowedByPolicy", "target": "vnet-westus",
@@ -591,25 +691,35 @@ compliance data.
 **Policy > Remediation** lists only P1. Remediation exists for effects that
 know the fix (`Modify`, `DeployIfNotExists`); the three Deny rules have nothing
 to apply. *Resources to Remediate: 1* is `vnet-before`. The assignment page's
-**Create remediation task** button opens the same form.
+**Create remediation task** button opens the same form (Figures 1.51 and 1.52).
 
 ![Only P1 can be remediated](screenshots/01-47-policies-to-remediate.png)
 
+*Figure 1.51: Only P1 can be remediated.*
+
 ![New remediation task, vnet-before listed](screenshots/01-48-new-remediation-task.png)
+
+*Figure 1.52: New remediation task, vnet-before listed.*
 
 The form restates P1's "if missing": *if the tag exists with a different
 value it will not be changed.* Defaults kept: all locations, failure threshold
-100%, resource count 500.
+100%, resource count 500 (Figure 1.53).
 
-![Task in progress](screenshots/01-49-remediation-in-progress.png)
+![Remediation task in progress](screenshots/01-49-remediation-in-progress.png)
 
-**The task failed.**
+*Figure 1.53: Remediation task in progress.*
+
+**The task failed.** (Figure 1.54)
 
 ![Remediation task failed](screenshots/01-50-remediation-failed.png)
 
-The `vnet-before` row's deployment error explains why:
+*Figure 1.54: Remediation task failed.*
+
+The `vnet-before` row's deployment error explains why (Figure 1.55):
 
 ![Remediation blocked by P3](screenshots/01-51-remediation-blocked-by-p3.png)
+
+*Figure 1.55: Remediation blocked by P3.*
 
 ```
 PolicyRemediationFailure: Failed to remediate resource ... vnet-before.
@@ -631,23 +741,31 @@ runs.
 
 ### 6. Fix it by hand
 
-On `vnet-before`'s Tags page, only `owner = noble` was added and applied.
+On `vnet-before`'s Tags page, only `owner = noble` was added and applied (Figure 1.56).
 
 ![Adding only owner](screenshots/01-52-vnet-before-add-owner.png)
 
-Afterwards the network carried **both** `owner` and `costCenter`.
+*Figure 1.56: Adding only owner.*
 
-![vnet-before with both tags](screenshots/01-54-vnet-before-both-tags.png)
+Afterwards the network carried **both** `owner` and `costCenter` (Figure 1.57).
+
+![Vnet-before with both tags](screenshots/01-54-vnet-before-both-tags.png)
+
+*Figure 1.57: Vnet-before with both tags.*
 
 A second remediation task was started straight after, which made it look as
 if the task had added `costCenter`. The Remediation page said otherwise:
-**Resources to Remediate: 0**. There was nothing left for it to do.
+**Resources to Remediate: 0**. There was nothing left for it to do (Figure 1.58).
 
 ![Nothing left to remediate](screenshots/01-53-nothing-left-to-remediate.png)
 
-The `vnet-before` Activity log settles it:
+*Figure 1.58: Nothing left to remediate.*
+
+The `vnet-before` Activity log settles it (Figure 1.59):
 
 ![Write tags with Modify inside it](screenshots/01-55-write-tags-then-modify.png)
+
+*Figure 1.59: Write tags with Modify inside it.*
 
 | When | Operation | Result | What happened |
 |---|---|---|---|
@@ -664,11 +782,15 @@ fixing the missing Deny tag fixed the Modify tag for free.
 
 **Resource group > Settings > Locks > Add**: `lock-no-delete`, type
 **Delete** (the portal's name for `CanNotDelete`), note *Lab 01: blocks
-accidental deletion*.
+accidental deletion*. (Figures 1.60 and 1.61)
 
-![Adding the lock](screenshots/01-56-add-lock.png)
+![Adding the CanNotDelete lock](screenshots/01-56-add-lock.png)
 
-![Lock in place](screenshots/01-57-lock-in-place.png)
+*Figure 1.60: Adding the CanNotDelete lock.*
+
+![The CanNotDelete lock in place](screenshots/01-57-lock-in-place.png)
+
+*Figure 1.61: The CanNotDelete lock in place.*
 
 The resource group list in the first screenshot also shows
 **NetworkWatcherRG**, which this lab never created. Azure makes it, with a
@@ -676,21 +798,27 @@ Network Watcher for the region, automatically the first time a virtual network
 is created in a subscription and region.
 
 **Delete is blocked.** Deleting `vnet-p1-test` failed straight away, for the
-Owner, because the group's lock applies to everything inside it:
+Owner, because the group's lock applies to everything inside it (Figure 1.62):
 
 ![Cannot delete because there is a lock](screenshots/01-58-lock-blocks-delete.png)
+
+*Figure 1.62: Cannot delete because there is a lock.*
 
 **Changes are not.** The first attempt to add `test = 1` failed, but the error
 named **P3 require owner**, not the lock: `vnet-p1-test` had no `owner` tag, so
 any update to it was refused. The Tags page's own error panel names the policy
-directly, which is quicker than the Activity log.
+directly, which is quicker than the Activity log (Figure 1.63).
 
 ![Change blocked by P3, not by the lock](screenshots/01-59-change-blocked-by-p3-not-lock.png)
 
+*Figure 1.63: Change blocked by P3, not by the lock.*
+
 With `owner = noble` added in the same edit, the change went through under the
-lock:
+lock (Figure 1.64):
 
 ![Change allowed under a Delete lock](screenshots/01-60-change-allowed-under-lock.png)
+
+*Figure 1.64: Change allowed under a Delete lock.*
 
 | Lock type | Change a resource | Delete a resource |
 |---|---|---|
@@ -788,9 +916,11 @@ Contributor grant was wider than needed.
 day sent the network's tags as `{owner}` only, which on its own would have
 removed `costCenter`. By then P1 was live: it added `costCenter` back inside that
 same request. Re-running the remediation task afterwards found **0** resources
-left to fix.
+left to fix (Figure 1.65).
 
 ![Remediation re-run: nothing left to fix](screenshots/01-64-iac-remediation-nothing-left.png)
+
+*Figure 1.65: Remediation re-run: nothing left to fix.*
 
 ## What I found
 
@@ -842,19 +972,25 @@ Done 26 Oct, in this order:
 1. **Delete the resource group with the lock still on.** Refused: *"Resource
    group rg-lab-governance-tagging has locks applied. Remove the locks before
    deleting."* All five networks were still there: the lock is checked before
-   anything is deleted, so there is no half-deleted group.
+   anything is deleted, so there is no half-deleted group (Figure 1.66).
 
    ![Delete refused by the lock](screenshots/01-61-teardown-blocked-by-lock.png)
 
-2. **Remove the lock, delete the group.** Same for the `-iac` group.
+   *Figure 1.66: Delete refused by the lock.*
 
-   ![Deleting](screenshots/01-62-teardown-deleting.png)
+2. **Remove the lock, delete the group.** Same for the `-iac` group (Figure 1.67).
+
+   ![The resource group being deleted](screenshots/01-62-teardown-deleting.png)
+
+   *Figure 1.67: The resource group being deleted.*
 
 3. **Check what survived.** P1, P2, P3, their identities and P1's role assignment
    went with the groups. **Both P4 assignments were still there**, on the
-   subscription, still allowing only East US. They were deleted on their own.
+   subscription, still allowing only East US. They were deleted on their own (Figure 1.68).
 
    ![Only ASC Default left](screenshots/01-63-teardown-only-asc-default-left.png)
+
+   *Figure 1.68: Only ASC Default left.*
 
 The same steps from the command line:
 
