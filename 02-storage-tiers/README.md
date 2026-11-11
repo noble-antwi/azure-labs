@@ -9,7 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Lifecycle walk and bill read. Rebuilt in Bicep and verified.
+> **Status:** complete. Built and tested in the portal. Lifecycle walk and bill read. Rebuilt in Bicep and verified. Torn down 11 Nov 2026.
 
 ## What this lab is
 
@@ -776,6 +776,12 @@ what this lab measures.
 
 ```bash
 az group delete --name rg-lab-storage-tiers --yes --no-wait
+az group delete --name rg-lab-storage-tiers-iac --yes --no-wait
 ```
+
+**Done 11 Nov 2026.** Both groups deleted; a check for any group starting
+`rg-lab-storage` returned nothing. (In PowerShell, a JMESPath query with
+brackets and parentheses gets mangled on its way through `az.cmd`;
+`az group list -o table` is the simpler check there.)
 
 The ntfy topic needs no cleanup: with the Logic App gone it simply goes quiet.
