@@ -682,13 +682,22 @@ reading its data.*
 ## Cost
 
 The whole lab, 30 Oct to 11 Nov, cost **about $0.012**. Cost analysis, filtered
-to `rg-lab-storage-tiers` and grouped by meter, shows every line as *<$0.01*
-(Figure 2.53), so the exact figures below were read from the Cost Management
-query API with the same filter.
+to `rg-lab-storage-tiers` and grouped by meter, shows the shape of it
+(Figure 2.53): nothing before the build on 31 Oct, one step that day for the
+High-priority rehydration (dark blue), then a slow daily climb from the Logic
+App (light blue) as the lifecycle runs fired alerts.
+
+![Accumulated cost for rg-lab-storage-tiers, grouped by meter, 1 Oct to 11 Nov](screenshots/02-52-cost-by-meter-chart.png)
+
+*Figure 2.53: Accumulated cost for rg-lab-storage-tiers, grouped by meter, 1 Oct to 11 Nov.*
+
+The table view shows every line as *<$0.01* (Figure 2.54), so the exact
+figures below were read from the Cost Management query API with the same
+filter.
 
 ![Cost analysis for rg-lab-storage-tiers, grouped by meter: every line rounds to less than a cent](screenshots/02-51-cost-by-meter.png)
 
-*Figure 2.53: Cost analysis for rg-lab-storage-tiers, grouped by meter: every line rounds to less than a cent.*
+*Figure 2.54: Cost analysis for rg-lab-storage-tiers, grouped by meter: every line rounds to less than a cent.*
 
 | Meter | Service | Cost (USD) | What caused it |
 |---|---|---:|---|
