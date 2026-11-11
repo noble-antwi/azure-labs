@@ -9,7 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Lifecycle walk and bill read. Bicep rebuild still to come.
+> **Status:** built and tested in the portal. Lifecycle walk and bill read. Rebuilt in Bicep and verified.
 
 ## What this lab is
 
@@ -624,10 +624,54 @@ Every break ran inside the build:
 
 ## Rebuild it as code
 
-Planned, after the waiting items below are recorded: the storage account
-(keys off, anonymous off, TLS 1.2), container, both lifecycle rules and the
-role assignment in Bicep. The lifecycle rules translate almost one to one: the
-portal's **Code View** already shows them as JSON.
+[`bicep/main.bicep`](bicep/main.bicep) rebuilds the data side of the lab in
+about 120 lines. Each block maps to a portal step:
+
+| Bicep block | Portal step | What it sets |
+|---|---|---|
+| `sa` (storageAccounts) | 1 and 9 | LRS, Hot, TLS 1.2, HTTPS only, anonymous access off, **shared key off** |
+| `blobSvc` (blobServices) | none | the hidden layer between account and container; always named `default` |
+| `tiers` (containers) | 2 | private container |
+| `lifecycle` (managementPolicies) | 6 and 7 | both rules, copied from Code View, including the hidden `daysAfterLastTierChangeGreaterThan: 7` |
+| `readerOnContainer` (roleAssignments) | 10 | Storage Blob Data Reader, scoped to the container only |
+
+The Logic App alert pipeline (step 8) is left out: it holds the private
+ntfy topic, and the rebuild is about the storage decisions.
+
+**Reading the export first.** `az group export` on the portal-built group
+produced a template listing every property, defaults included. The two
+settings that mattered were easy to find in it, `"allowSharedKeyAccess": false`
+and `"minimumTlsVersion": "TLS1_2"`, but most of the file was settings never
+touched. A hand-written file only needs the choices you made.
+
+**Deploying.** Storage account names are global (the name becomes
+`<name>.blob.core.windows.net`), so the code uses `stlabtiersnoble02`; `01`
+would fail with *StorageAccountAlreadyTaken*. The reader's object ID is a
+parameter passed at deploy time, so no identifier sits in the repo.
+
+```powershell
+az group create --name rg-lab-storage-tiers-iac --location eastus `
+  --tags environment=lab purpose=lab lab=storage-tiers owner=noble costCenter=it-lab autoDelete=true
+
+$me = az ad signed-in-user show --query id -o tsv
+az deployment group create --resource-group rg-lab-storage-tiers-iac `
+  --template-file 02-storage-tiers/bicep/main.bicep --parameters readerPrincipalId=$me
+```
+
+**Result, 11 Nov 2026:** the deployment succeeded in 26 seconds, and read-back
+checks matched the portal build setting for setting:
+
+```text
+storage account   sku Standard_LRS, tier Hot, tls TLS1_2, https true,
+                  sharedKey false, anonymous false
+lifecycle         tier-by-age  prefix tiers/lc-  cool 30   archive 180
+                  fast-demo    prefix tiers/lc   cool 1  cold 2  archive 3
+role on 'tiers'   Storage Blob Data Reader, principal type User
+```
+
+What took about an hour of clicking across two sessions deployed in under
+half a minute, and redeploying it changes nothing: Bicep describes the end
+state, not the steps.
 
 ## What I found
 
