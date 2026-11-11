@@ -9,8 +9,7 @@ travels through Event Grid and a Logic App to a phone alert. Built by
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
-> **Status:** built and tested in the portal. Lifecycle walk complete.
-> Still waiting on the bill: early-deletion charges and per-tier costs. See [Still waiting on](#still-waiting-on).
+> **Status:** built and tested in the portal. Lifecycle walk and bill read. Bicep rebuild still to come.
 
 ## What this lab is
 
@@ -38,9 +37,9 @@ then has to be pulled back in a hurry.
 
 | # | My prediction | What actually happened |
 |---|---|---|
-| 1 | Cool. |  |
+| 1 | Cool. | Not measurable at this size. Storing a few kilobytes in any tier rounded to nothing; every cent on the bill came from reading, writing and rehydrating, not from keeping (Cost). |
 | 2 | It is first moved out of archive, through cold and cool to hot, and only then can be read. | Half right. It cannot be read until it is brought back online (step 4), but there is no stepping through tiers: it goes straight to whichever online tier is chosen. |
-| 3 | You pay for one day. |  |
+| 3 | You pay for one day. | Wrong way round. You pay for the days you *did not* stay: a **Cold LRS Early Delete** line appeared for leaving Cold after 3 of its 90 days. For a few kilobytes it came to $0.0000000072 (Cost). |
 | 4 | No. Owner cannot open the files once keys are off. | Correct. Owner manages the account but has no data rights; reading needed a separate data role (step 10). |
 
 ## Key ideas, from zero
@@ -635,7 +634,9 @@ portal's **Code View** already shows them as JSON.
 **1. The colder the tier, the cheaper to keep and the dearer to read.** From the
 reader's side Hot, Cool and Cold behave identically: the files opened straight
 away in all three. The difference is only on the bill, which will be read
-before question 1 is answered here.
+on reads and writes. Storing kilobytes costs nothing measurable in any tier;
+the bill for the whole lab was about **1.2 cents**, and the largest storage line
+was the one High-priority rehydration (see [Cost](#cost)).
 
 **2. Archive is offline, not slow.** An archived blob cannot be opened or
 downloaded at all. Getting it back means changing its tier, or copying it, to
@@ -643,8 +644,10 @@ any online tier directly; there is no stepping through Cold and Cool. High
 priority took about **37 minutes** for a tiny file and Standard about **3 hours 15 minutes**: roughly five times longer, for the same 150-byte file.
 
 **3. Minimum stays are charged, not enforced.** Azure let a file leave Cool
-minutes after entering it. The 30-day minimum is billed, not blocked: the
-early-deletion charge should appear on the bill.
+minutes after entering it, and lifecycle moved files out of Cold after 3 days.
+Nothing was blocked; instead the bill carries a **Cold LRS Early Delete** line
+for the unserved part of Cold's 90 days. No Cool or Archive early-delete line
+appeared; at a few hundred bytes those charges are most likely below what the bill records.
 
 **4. Owner is not data access.** With key access disabled, the subscription
 Owner could not list a single file. A data-plane role, Storage Blob Data
@@ -676,21 +679,40 @@ cost and speed of reading; Archive is offline until rehydrated, minimum stays
 are billed rather than enforced, and managing a storage account never implies
 reading its data.*
 
-## Still waiting on
-
-| Item | Expected | Where it goes |
-|---|---|---|
-| Early-deletion charge for Cool and Archive | 24 to 48 h on the bill | question 3, Cost |
-| Real per-tier costs | Cost Management, a few days in | question 1 |
-
 ## Cost
 
-A few cents. The files are tiny and storage is billed per GB per month. The
-items worth watching are the **early-deletion charges** (Cool's 30-day
-minimum was broken on purpose; the archived files will be deleted inside 180
-days), High-priority rehydration, and Logic App runs, which are billed per
-action and come to fractions of a cent here. Real figures from Cost Management
-will replace this paragraph.
+The whole lab, 30 Oct to 11 Nov, cost **about $0.012**. Cost analysis, filtered
+to `rg-lab-storage-tiers` and grouped by meter, shows every line as *<$0.01*
+(Figure 2.53), so the exact figures below were read from the Cost Management
+query API with the same filter.
+
+![Cost analysis for rg-lab-storage-tiers, grouped by meter: every line rounds to less than a cent](screenshots/02-51-cost-by-meter.png)
+
+*Figure 2.53: Cost analysis for rg-lab-storage-tiers, grouped by meter: every line rounds to less than a cent.*
+
+| Meter | Service | Cost (USD) | What caused it |
+|---|---|---:|---|
+| Consumption Standard Connector Actions | Logic Apps | 0.0055 | 44 connector actions: the HTTP posts to ntfy |
+| Archive Priority Read Operations | Storage | 0.0050 | the one High-priority rehydration (step 5) |
+| Consumption Built-in Actions | Logic Apps | 0.00055 | 22 built-in actions in the runs |
+| All Other Operations | Storage | 0.00020 | lifecycle tier changes, listing |
+| Cold, Archive, Cool LRS Write Operations | Storage | 0.00017 | uploads and tier moves |
+| Consumption Data Retention | Logic Apps | 0.00006 | run history |
+| Cold and Cool Read Operations, Data Retrieval | Storage | 0.00003 | opening files in step 4 |
+| **Cold LRS Early Delete** | Storage | **0.0000000072** | leaving Cold after 3 of 90 days (question 3) |
+| Hot reads and writes, Event Grid, bandwidth | | 0.00 | free allowance |
+
+What the numbers say:
+
+- **Keeping is not where the money went.** No data-stored line appears for any
+  tier; kilobytes for twelve days round to zero.
+- **One urgent read cost almost as much as all other storage activity
+  combined.** High-priority rehydration of one 150-byte file: half a cent.
+  Standard priority for the other file did not appear as a separate charge.
+- **The alerting cost more than the storage.** The Logic App was about half
+  the bill. Monitoring is not free, even when the thing monitored is nearly free.
+- **Early deletion is real and prorated.** It appeared exactly where predicted
+  (Cold, 3 days into 90), scaled by size.
 
 ## Teardown
 
