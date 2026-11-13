@@ -5,7 +5,9 @@
 *Figure 2.1: Where a file lives, and what it takes to get it back. Animated. A file walks down the tiers under a lifecycle rule, goes offline in
 Archive, is refused a read, and is rehydrated back to Hot; every tier change
 travels through Event Grid and a Logic App to a phone alert. Built by
-[`scripts/diagrams/lab02_tier_flow.py`](../scripts/diagrams/lab02_tier_flow.py).*
+[`scripts/diagrams/lab02_tier_flow.py`](../scripts/diagrams/lab02_tier_flow.py);
+video versions: [landscape](diagrams/tier-flow.mp4) ·
+[vertical](diagrams/tier-flow-vertical.mp4).*
 
 > **Intent:** Find the real cost and latency differences between hot, cool, cold and archive tiers, and what rehydrating an archived blob actually involves.
 
