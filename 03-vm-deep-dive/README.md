@@ -36,7 +36,7 @@ manages it without SSH, and then tests the two ways of "turning it off".
 
 | Term | Plain meaning |
 |---|---|
-| **Size** | The VM's CPU and memory, e.g. `Standard_B1s` (1 vCPU, 1 GiB). The family letter says what it is for; **B** is burstable: cheap, banks CPU credits when idle. |
+| **Size** | The VM's CPU and memory, e.g. `Standard_B2ats_v2` (2 vCPU, 1 GiB) or `Standard_D2als_v6` (2 vCPU, 4 GiB). The family letter says what it is for; **B** is burstable: cheap, banks CPU credits when idle. |
 | **OS disk** | A managed disk holding the operating system. Survives stop and deallocate; billed while it exists. |
 | **Temporary disk** | Fast local storage on the physical host, mounted at `/mnt` on Linux. **Wiped** when the VM moves to another host. |
 | **NIC** | Network interface: connects the VM to a subnet and holds its private IP. |
@@ -56,7 +56,7 @@ graph LR
     NSG["nsg: no inbound rules"]
     NIC["NIC<br/>private IP"]
     PIP["Public IP<br/>Standard, static"]
-    VM["vm-lab-01<br/>Ubuntu · Standard_B1s"]
+    VM["vm-lab-01<br/>Ubuntu · Standard_D2als_v6"]
     OS["OS disk<br/>Standard SSD"]
   end
   NSG --- NIC
@@ -72,7 +72,7 @@ graph LR
 | Resource | SKU / setting | Why it's here |
 |---|---|---|
 | `rg-lab-vm` | resource group, East US | holds the lab |
-| `vm-lab-01` | Ubuntu Server LTS, `Standard_B1s` | the smallest general size, pennies per hour |
+| `vm-lab-01` | Ubuntu Server 24.04 LTS, `Standard_D2als_v6` | the cheapest x64 size with quota (see step 2) |
 | OS disk | Standard SSD | survives stop and deallocate; still billed |
 | Virtual network, NIC, public IP, NSG | created with the VM | to see each as its own resource |
 | Inbound ports | **none** | managed through Run Command, never exposed to the internet |
@@ -87,9 +87,41 @@ you chose what you chose. Screenshots go in screenshots/ and are referenced
 inline where they clarify something.
 -->
 
-1.
-2.
-3.
+### 1. Create the resource group
+
+`rg-lab-vm` in East US with the lab tags; the lab 01 policy adds `costCenter`
+on its own (Figure 3.1).
+
+![Review + create for rg-lab-vm](screenshots/03-01-rg-review.png)
+
+*Figure 3.1: Review + create for rg-lab-vm.*
+
+### 2. Choose a size, and meet quota
+
+The create form defaulted to **Standard_D2s_v3 at $70.08 a month**, about ten
+times what a lab VM needs. The plan was a B-series burstable size, and that is
+where the lab hit its first real wall:
+
+- `Standard_B1s` is no longer offered in East US for this subscription.
+- `Standard_B2ats_v2` ($6.86 a month) was listed but greyed out:
+  *Insufficient quota - family limit*. The subscription's quota for the
+  **Basv2 family was 0 vCPUs**, while most D, E and F families had 10.
+- The automatic quota increase to 4 vCPUs was **refused**, so a support
+  request (Basic plan, severity C) went to Microsoft instead.
+
+Quota is a ceiling on how many vCPUs of a family can run at once, per region.
+It costs nothing to hold, and keeping it low is a guardrail: nothing can start
+ten VMs by mistake. Rather than wait on the ticket, the lab uses the cheapest
+x64 size that already had quota:
+
+| Size | Per hour | Per month if never stopped |
+|---|---:|---:|
+| Standard_B2ats_v2 (no quota) | $0.0094 | $6.86 |
+| **Standard_D2als_v6** (chosen) | **$0.0804** | $58.69 |
+| Standard_D2s_v3 (portal default) | | $70.08 |
+
+At a few hours of running time, deallocated in between, the difference is
+cents; the monthly figure only matters for a VM that is left on.
 
 ## Break it
 
@@ -128,7 +160,7 @@ one sentence you would want to read back later.
 
 ## Cost
 
-`Standard_B1s` is about a cent per hour of compute while running. The disk and
+`Standard_D2als_v6` is about 8 cents per hour of compute while running. The disk and
 the public IP keep billing while the VM is stopped or deallocated, which is
 the point of question 1. Auto-shutdown and deallocating between sessions keep
 the lab to cents.
